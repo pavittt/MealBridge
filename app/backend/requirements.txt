@@ -1,0 +1,8 @@
+# MealBridge API (Stage 6). Install:  pip install -r requirements.txt
+fastapi>=0.110
+uvicorn>=0.29
+PyMySQL>=1.1        # pure-Python MySQL driver
+cryptography>=42    # needed by PyMySQL for MySQL 8's caching_sha2_password login
+bcrypt>=4.1         # checks the bcrypt password hashes stored in app_user
+pytest>=8           # API tests (tests/test_api.py)
+httpx>=0.27         # used by FastAPI's TestClient

@@ -1,0 +1,28 @@
+{
+  "name": "mealbridge-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MealBridge web app (Stage 6). Every screen reads and writes MySQL through the FastAPI backend.",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000"
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.8.1",
+    "gsap": "^3.15.0",
+    "leaflet": "^1.9.4",
+    "lenis": "^1.3.26",
+    "motion": "^14.0.0",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0",
+    "recharts": "^3.0.0",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  }
+}

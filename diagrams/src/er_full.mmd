@@ -1,0 +1,173 @@
+erDiagram
+    CAMPUS ||--o{ MESS : runs
+    SITE ||--o| MESS : "is a"
+    SITE ||--o| SHELTER : "is a"
+    SITE ||--o{ APP_USER : "staffed by"
+    APP_USER ||--o| VOLUNTEER : "is a"
+    MESS ||--o{ SURPLUS_BATCH : posts
+    APP_USER ||--o{ SURPLUS_BATCH : "posted by"
+    FOOD_CATEGORY ||--o{ SURPLUS_BATCH : classifies
+    SURPLUS_BATCH ||--o{ BATCH_DIET_TAG : has
+    DIET_TAG ||--o{ BATCH_DIET_TAG : "applies to"
+    SHELTER ||--o{ SHELTER_DIET_EXCLUSION : excludes
+    DIET_TAG ||--o{ SHELTER_DIET_EXCLUSION : "excluded by"
+    SHELTER ||--o{ SHELTER_DAY : "declares need"
+    SURPLUS_BATCH ||--o{ CLAIM : "claimed in"
+    SHELTER ||--o{ CLAIM : makes
+    APP_USER ||--o{ CLAIM : "claimed by"
+    VOLUNTEER ||--o{ PICKUP_TRIP : drives
+    PICKUP_TRIP ||--|{ TRIP_STOP : "has (weak)"
+    SITE ||--o{ TRIP_STOP : "visited at"
+    PICKUP_TRIP ||--o{ TRIP_ITEM : carries
+    CLAIM ||--o{ TRIP_ITEM : "moved by"
+    TRIP_STOP ||--o{ TRIP_ITEM : "pickup or drop at"
+    SURPLUS_BATCH ||--|{ CUSTODY_EVENT : "audited by"
+    CLAIM |o--o{ CUSTODY_EVENT : "context of"
+    PICKUP_TRIP |o--o{ CUSTODY_EVENT : "context of"
+    APP_USER |o--o{ CUSTODY_EVENT : records
+    FOOD_CATEGORY ||--o{ MENU_ITEM : groups
+    MESS ||--o{ MESS_MEAL_LOG : logs
+    MESS_MEAL_LOG ||--o{ MESS_MENU : serves
+    MENU_ITEM ||--o{ MESS_MENU : "served in"
+    MESS ||--o{ SURPLUS_FORECAST : "forecast for"
+    APP_USER ||--o{ NOTIFICATION : receives
+    SURPLUS_BATCH |o--o{ NOTIFICATION : about
+
+    CAMPUS { smallint campus_id PK
+             varchar name UK
+             varchar city }
+    SITE { int site_id PK
+           enum site_type "MESS | SHELTER (discriminator)"
+           varchar name
+           varchar address_line
+           varchar city
+           char pincode
+           point location "SRID 4326, spatial index"
+           varchar contact_phone
+           boolean is_active
+           datetime created_at }
+    MESS { int site_id PK,FK
+           smallint campus_id FK
+           varchar hostel_block
+           enum mess_type
+           int daily_capacity_meals
+           char fssai_license_no UK }
+    SHELTER { int site_id PK,FK
+              enum shelter_type
+              varchar registration_no UK
+              int beneficiary_count
+              boolean has_refrigeration
+              decimal default_capacity_kg }
+    APP_USER { int user_id PK
+               varchar email UK
+               varchar full_name
+               varchar phone
+               char password_hash
+               enum role
+               int site_id FK "NULL for volunteer, admin"
+               boolean is_active }
+    VOLUNTEER { int user_id PK,FK
+                enum vehicle_type
+                decimal max_load_kg
+                point home_location
+                boolean is_available
+                datetime verified_at }
+    FOOD_CATEGORY { smallint category_id PK
+                    varchar name UK
+                    enum risk_level
+                    decimal safe_hours_ambient
+                    decimal safe_hours_hot_held
+                    decimal safe_hours_chilled
+                    decimal kg_per_meal
+                    decimal co2e_kg_per_kg "NULL until cited"
+                    varchar values_source "TO VERIFY or citation" }
+    SURPLUS_BATCH { int batch_id PK
+                    int mess_site_id FK
+                    smallint category_id FK
+                    int posted_by FK
+                    enum meal_slot
+                    decimal quantity_kg
+                    enum storage
+                    datetime cooked_at
+                    datetime packed_at
+                    datetime safe_until "snapshot, set by trigger"
+                    enum status }
+    DIET_TAG { varchar tag_code PK
+               varchar description }
+    BATCH_DIET_TAG { int batch_id PK,FK
+                     varchar tag_code PK,FK }
+    SHELTER_DIET_EXCLUSION { int shelter_site_id PK,FK
+                             varchar tag_code PK,FK }
+    SHELTER_DAY { int shelter_site_id PK,FK
+                  date day PK
+                  int meals_needed
+                  decimal capacity_kg
+                  decimal reserved_kg "trigger-maintained" }
+    CLAIM { int claim_id PK
+            int batch_id FK
+            int shelter_site_id FK
+            int claimed_by FK
+            datetime claimed_at
+            decimal match_score "snapshot"
+            decimal distance_km "snapshot"
+            enum status
+            int active_batch_id UK "generated: batch_id while live" }
+    PICKUP_TRIP { int trip_id PK
+                  int volunteer_id FK
+                  enum status
+                  datetime planned_start
+                  datetime started_at
+                  datetime completed_at }
+    TRIP_STOP { int trip_id PK,FK
+                tinyint stop_seq PK "partial key"
+                int site_id FK
+                enum stop_type
+                datetime planned_eta
+                datetime arrived_at }
+    TRIP_ITEM { int trip_id PK,FK
+                int claim_id PK,FK
+                tinyint pickup_seq FK
+                tinyint drop_seq FK }
+    CUSTODY_EVENT { bigint event_id PK
+                    int batch_id FK
+                    int claim_id FK
+                    int trip_id FK
+                    enum event_type
+                    datetime event_time
+                    int actor_user_id FK
+                    decimal temperature_c
+                    boolean hygiene_ok
+                    char prev_hash
+                    char row_hash UK }
+    MENU_ITEM { smallint menu_item_id PK
+                varchar name UK
+                smallint category_id FK }
+    MESS_MEAL_LOG { int mess_site_id PK,FK
+                    date service_date PK
+                    enum meal_slot PK
+                    int expected_headcount
+                    int actual_headcount
+                    decimal prepared_kg
+                    decimal leftover_kg }
+    MESS_MENU { int mess_site_id PK,FK
+                date service_date PK,FK
+                enum meal_slot PK,FK
+                smallint menu_item_id PK,FK }
+    SURPLUS_FORECAST { int mess_site_id PK,FK
+                       date forecast_date PK
+                       enum meal_slot PK
+                       varchar method PK
+                       decimal predicted_kg }
+    NOTIFICATION { bigint notification_id PK
+                   int user_id FK
+                   enum kind
+                   int batch_id FK
+                   datetime read_at }
+    SCORING_WEIGHT { varchar weight_key PK
+                     decimal weight_value }
+    AUDIT_LOG { bigint audit_id PK
+                varchar table_name
+                varchar row_pk
+                enum action
+                json old_values
+                json new_values }

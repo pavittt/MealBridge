@@ -1,0 +1,162 @@
+==============================================================================
+D1. INSERT a new shelter: supertype row first, then subtype row
+Why: SITE -> SHELTER is an EER specialization. The SITE row gets the id; the SHELTER row reuses it, and its composite FK (site_id, site_type) proves the site really is a shelter.
+------------------------------------------------------------------------------
++---------+----------------------+-----------+----------------+---------------------+
+| site_id | name                 | site_type | subtype_pinned | default_capacity_kg |
++---------+----------------------+-----------+----------------+---------------------+
+|      19 | SYN New Hope Shelter | SHELTER   | SHELTER        |               25.00 |
++---------+----------------------+-----------+----------------+---------------------+
+
+==============================================================================
+D2. INSERT multi-valued attribute rows (diet exclusions) and a staff login
+Why: "no non-veg, no egg" is a multivalued attribute, so it is one row per tag (1NF). The staff user must point at a SHELTER site (trigger trg_user_bi checks it).
+------------------------------------------------------------------------------
++--------------+
+| tag_code     |
++--------------+
+| CONTAINS_EGG |
+| NON_VEG      |
++--------------+
+
+==============================================================================
+D3. INSERT ... SELECT: plan tomorrow's need and capacity for every active shelter
+Why: a set-based insert builds one row per active shelter in one statement from data already in the database; ON DUPLICATE KEY UPDATE makes it safe to re-run (an "upsert").
+------------------------------------------------------------------------------
++---------------------+
+| rows_for_day_plus_2 |
++---------------------+
+|                  11 |
++---------------------+
+
+==============================================================================
+D4. INSERT a surplus batch and its diet tags
+Why: the core event of the system. The BEFORE INSERT trigger overwrites safe_until with the perishability clock and the AFTER INSERT trigger starts the custody chain. (The app does this through sp_post_batch; it is written out here because that procedure commits its own transaction, which would end this demo's transaction.)
+------------------------------------------------------------------------------
++----------+--------------+-------------+---------------------+---------------------+-----------+
+| batch_id | mess_site_id | quantity_kg | cooked_at           | safe_until          | status    |
++----------+--------------+-------------+---------------------+---------------------+-----------+
+|      494 |            2 |       11.00 | 2026-10-05 12:07:39 | 2026-10-05 16:07:39 | AVAILABLE |
++----------+--------------+-------------+---------------------+---------------------+-----------+
++------------+-------------------------+
+| event_type | event_time              |
++------------+-------------------------+
+| COOKED     | 2026-10-05 12:07:39.000 |
+| PACKED     | 2026-10-05 12:32:39.000 |
+| POSTED     | 2026-10-05 12:37:39.000 |
++------------+-------------------------+
+
+==============================================================================
+D5. UPDATE a shelter's need for today
+Why: need changes daily (more residents tonight). This raises its need score in matching. The shelter role may update only meals_needed and capacity_kg, never reserved_kg.
+------------------------------------------------------------------------------
++--------------+-------------+
+| meals_needed | capacity_kg |
++--------------+-------------+
+|          128 |       52.14 |
++--------------+-------------+
++--------------+-------------+
+| meals_needed | capacity_kg |
++--------------+-------------+
+|          158 |       62.14 |
++--------------+-------------+
+
+==============================================================================
+D6. UPDATE a batch description (allowed) and a deadline (refused, EXPECT ERROR)
+Why: a typo fix is harmless; the deadline is a frozen snapshot. Each successful change is copied to audit_log by a trigger.
+------------------------------------------------------------------------------
+ERROR 1644 (45000): Deadline inputs (cooked_at, category, storage, safe_until) are frozen once posted
++--------+-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+
+| action | old_values                                                                          | new_values                                                                                                                            |
++--------+-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+
+| INSERT | NULL                                                                                | {"mess": 2, "qty_kg": 11.00, "status": "AVAILABLE", "storage": "HOT_HELD", "category": 2, "safe_until": "2026-10-05 16:07:39.000000"} |
+| UPDATE | {"qty_kg": 11.00, "status": "AVAILABLE", "description": "SYN Aloo gobi (DML demo)"} | {"qty_kg": 11.00, "status": "AVAILABLE", "description": "SYN Aloo gobi, mildly spiced (DML demo)"}                                    |
++--------+-------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+
+
+==============================================================================
+D7. UPDATE with a JOIN: deactivate a shelter and all its staff logins at once
+Why: a multi-table UPDATE keeps the site and its users consistent in one statement. The role-change trigger writes the audit rows.
+------------------------------------------------------------------------------
++----------------------+-------------+---------------------+-------------+
+| name                 | site_active | email               | user_active |
++----------------------+-------------+---------------------+-------------+
+| SYN New Hope Shelter |           0 | newhope@example.org |           0 |
++----------------------+-------------+---------------------+-------------+
+
+==============================================================================
+D8. UPDATE via procedure: a shelter cancels its live claim
+Why: cancelling must release the shelter's reserved capacity and re-offer the food; the claim triggers do both. (sp_cancel_claim has no transaction of its own, so it stays inside this demo's transaction.)
+------------------------------------------------------------------------------
++-------------+
+| reserved_kg |
++-------------+
+|       15.00 |
++-------------+
++----------+-----------+--------------------------+
+| claim_id | status    | close_reason             |
++----------+-----------+--------------------------+
+|      379 | CANCELLED | SYN demo: van broke down |
++----------+-----------+--------------------------+
++-------------+
+| reserved_kg |
++-------------+
+|        0.00 |
++-------------+
+
+==============================================================================
+D9. DELETE a wrongly entered diet tag
+Why: the batch was tagged SPICY by mistake. Deleting the tag row is correct (it is a fact that is false), and trg_bdt_ad keeps a record of the deletion.
+------------------------------------------------------------------------------
++-----------------------+
+| tag_code              |
++-----------------------+
+| CONTAINS_ONION_GARLIC |
+| VEG                   |
++-----------------------+
++--------+-----------+-----------------------------------+
+| action | row_pk    | old_values                        |
++--------+-----------+-----------------------------------+
+| DELETE | 494/SPICY | {"tag": "SPICY", "batch_id": 494} |
++--------+-----------+-----------------------------------+
+
+==============================================================================
+D10. DELETE notifications the volunteer has already read (housekeeping)
+Why: once read, a trip alert has no further use; deleting read rows keeps the "my unread notifications" index (IDX-15) small. Safe because no table references notification.
+------------------------------------------------------------------------------
++------------------+
+| read_trip_alerts |
++------------------+
+|               31 |
++------------------+
++--------------+
+| deleted_rows |
++--------------+
+|           31 |
++--------------+
+
+==============================================================================
+D11. DELETE that the database refuses (EXPECT ERROR x2)
+Why: a mess with batches cannot be deleted (FK RESTRICT protects history), and custody events are append-only (trigger). Deactivate instead of delete.
+------------------------------------------------------------------------------
+ERROR 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`mealbridge`.`trip_stop`, CONSTRAINT `fk_stop_site` FOREIGN KEY (`site_id`) REFERENCES `site` (`site_id`))
+ERROR 1644 (45000): R8: custody_event is append-only (DELETE refused)
+
+==============================================================================
+D12. DELETE with ON DELETE CASCADE
+Why: shelter_diet_exclusion rows belong to the shelter (ON DELETE CASCADE), so deleting the new shelter's subtype row removes its exclusions automatically. (Its site row has no history yet, so it can go too.)
+------------------------------------------------------------------------------
++-------------------------------------+
+| exclusions_left_for_deleted_shelter |
++-------------------------------------+
+|                                   0 |
++-------------------------------------+
+
+==============================================================================
+D13. Undo everything in this file
+------------------------------------------------------------------------------
++-------------------------+
+| shelters_after_rollback |
++-------------------------+
+|                      10 |
++-------------------------+
+

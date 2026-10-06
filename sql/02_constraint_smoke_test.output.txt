@@ -1,0 +1,27 @@
+test
+--- T1 EXPECT ERROR: a MESS row pointing at a SHELTER site (disjoint specialization)
+ERROR 1452 (23000) at line 19: Cannot add or update a child row: a foreign key constraint fails (`mealbridge`.`mess`, CONSTRAINT `fk_mess_site` FOREIGN KEY (`site_id`, `site_type`) REFERENCES `site` (`site_id`, `site_type`))
+test
+--- T2 EXPECT ERROR: a VOLUNTEER user attached to a site
+ERROR 3819 (HY000) at line 23: Check constraint 'chk_user_site_by_role' is violated.
+test
+--- T3 EXPECT ERROR: batch posted against a SHELTER site (FK to mess)
+ERROR 1452 (23000) at line 35: Cannot add or update a child row: a foreign key constraint fails (`mealbridge`.`surplus_batch`, CONSTRAINT `fk_batch_mess` FOREIGN KEY (`mess_site_id`) REFERENCES `mess` (`site_id`))
+test
+--- T4 EXPECT ERROR: negative quantity
+ERROR 3819 (HY000) at line 39: Check constraint 'chk_batch_qty' is violated.
+test
+--- T5 EXPECT ERROR: second live claim on the same batch
+ERROR 1062 (23000) at line 45: Duplicate entry '1' for key 'claim.uq_claim_one_live_per_batch'
+test
+--- T6 cancel the first claim, then a new claim is allowed
+claim_id	batch_id	status	active_batch_id
+1	1	CANCELLED	NULL
+3	1	ACTIVE	1
+test
+--- T7 EXPECT ERROR: shelter reserved beyond its daily capacity
+ERROR 3819 (HY000) at line 55: Check constraint 'chk_sd_reserved' is violated.
+test
+--- T8 Nearby-shelter query using the spatial column (km)
+name	km_from_mess
+SYNTHETIC Shelter 1	1.96

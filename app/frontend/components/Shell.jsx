@@ -20,7 +20,7 @@ const HOME = { MESS_ADMIN: "/mess", SHELTER: "/shelter", VOLUNTEER: "/volunteer"
 const ROLE_LABEL = { MESS_ADMIN: "Mess admin", SHELTER: "Shelter", VOLUNTEER: "Volunteer", PLATFORM_ADMIN: "Platform admin" };
 export const homeFor = (role) => HOME[role] || "/";
 
-/* The mark: an accent-coloured (crimson) tile holding a bridge. The arch is the route from a
+/* The mark: a saffron tile holding a bridge. The arch is the route from a
    mess to a shelter; the deck is the table it lands on; the green grain at
    the top of the arch is the meal in transit. */
 export function LogoMark({ className = "w-9 h-9" }) {
@@ -49,14 +49,14 @@ export function Logo({ size = "text-[1.35rem]", mark = "w-8 h-8" }) {
 }
 
 function ThemeToggle() {
-  // The light pastel-glass look is the default; the toggle flips to dark and back.
+  // Dark is the default look; the toggle flips to light and back.
   // The choice is saved in localStorage and applied before paint (layout.jsx).
-  const [theme, setTheme] = useState("light");
-  useEffect(() => { try { setTheme(localStorage.getItem("mb_theme_v2") === "dark" ? "dark" : "light"); } catch {} }, []);
+  const [theme, setTheme] = useState("dark");
+  useEffect(() => { try { setTheme(localStorage.getItem("mb_theme") === "light" ? "light" : "dark"); } catch {} }, []);
   const apply = (t) => {
     setTheme(t);
-    try { localStorage.setItem("mb_theme_v2", t); } catch {}
-    if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    try { localStorage.setItem("mb_theme", t); } catch {}
+    if (t === "light") document.documentElement.setAttribute("data-theme", "light");
     else document.documentElement.removeAttribute("data-theme");
   };
   const next = theme === "dark" ? "light" : "dark";
@@ -65,7 +65,7 @@ function ThemeToggle() {
             aria-label={`Theme: ${theme}. Switch to ${next}`} title={`Switch to ${next} theme`}>
       <span className="inline-block w-2.5 h-2.5 rounded-full border border-current"
             style={{ background: theme === "dark" ? "transparent" : "currentColor" }} aria-hidden="true" />
-      <span className="hidden sm:inline lg:hidden xl:inline">{theme === "dark" ? "Paper" : "Night"}</span>
+      <span className="hidden sm:inline">{theme === "dark" ? "Paper" : "Night"}</span>
     </button>
   );
 }
@@ -127,7 +127,7 @@ export default function Shell({ children }) {
           <nav aria-label="Main" className="hidden lg:flex items-center gap-0.5 ml-1">
             {links.map(([href, label]) => (
               <Link key={href} href={href} aria-current={isActive(href) ? "page" : undefined}
-                    className={`nav-link px-2.5 xl:px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-300 ${
+                    className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-300 ${
                       isActive(href) ? "bg-surface-2 text-ink" : "text-muted hover:text-ink"}`}>
                 {label}
               </Link>

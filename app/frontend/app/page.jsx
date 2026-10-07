@@ -1,9 +1,9 @@
 "use client";
 /* =====================================================================
    Landing page, laid out like an editorial / luxury brand site.
-   1. Hero: one big glass slab, words left and the 3D town right (stacked
-      on phones; they never overlap), live "meals saved" from MySQL, and the
-      MealBridge wordmark as the box's title across its top.
+   1. Hero: the 3D town fills the whole first screen; the MealBridge
+      wordmark is set across the full width over it; live "meals saved"
+      from MySQL sits in the corner.
    2. Ticker: every live figure from v_impact_summary, running sideways.
    3. Statement + the daily delivered chart and the other live figures.
    4. Scroll story (components/landing/ScrollStory): the real SQL behind
@@ -14,7 +14,7 @@
    ===================================================================== */
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { Skeleton } from "@/components/ui";
 import Hero3D from "@/components/hero/Hero3D";
@@ -80,61 +80,104 @@ export default function Landing() {
   const [err, setErr] = useState(null);
   useEffect(() => { api("/api/public/impact").then(setD).catch(setErr); }, []);
   const s = d?.summary;
+  // null until measured, then true from 640 px up (decides where the 3D town goes)
+  const [wide, setWide] = useState(null);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const update = () => setWide(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // the wordmark drifts up and the town sinks a little as you scroll away
+  const { scrollY } = useScroll();
+  const markY = useTransform(scrollY, [0, 700], [0, -90]);
+  const townY = useTransform(scrollY, [0, 700], [0, 120]);
+  const townFade = useTransform(scrollY, [0, 650], [1, 0.25]);
+
   return (
     <div>
       <SmoothScroll />
 
-      {/* ---------- 1. hero: one big glass slab ----------
-          Two columns that never overlap: the words on the left, the 3D town in
-          its own box on the right (on wide screens it spills over the slab's
-          top, right and bottom edges, like a dish breaking out of a card).
-          On phones the town stacks under the words. */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 pt-8 sm:pt-12 pb-6" aria-labelledby="hero-h">
-        <div className="slab relative px-6 pt-8 pb-10 sm:px-12 sm:pt-10 sm:pb-14">
-          {/* the title of the box: the MealBridge wordmark across the top, in its
-              own row, so it never sits over the 3D town below it */}
-          <div className="wordmark wordmark-hero display leading-[.9] whitespace-nowrap select-none rise-in" style={{ animationDelay: "60ms" }}>
-            Meal<span className="text-glow">Bridge</span>
-          </div>
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-line grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-6 lg:gap-2 lg:min-h-[520px]">
-          <div className="relative z-10 lg:pr-4">
-            <h1 id="hero-h" className="text-[2.6rem] sm:text-6xl leading-[1.02] rise-in">
-              Tonight's extra rice <span className="text-glow">reaches a shelter</span> before it spoils.
-            </h1>
-            <p className="mt-6 text-base sm:text-lg text-muted leading-relaxed max-w-[46ch] rise-in" style={{ animationDelay: "120ms" }}>
-              A hostel mess posts its surplus. The database ranks nearby shelters, lets exactly one claim it, and keeps a
-              tamper-evident trail until it is delivered. Every rule lives in MySQL.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3 rise-in" style={{ animationDelay: "220ms" }}>
-              <Link href="/login" className="btn btn-primary !pl-6 !pr-2 !py-2 !text-base">Open the app <span className="btn-orb !w-9 !h-9 !mr-0" aria-hidden="true">↗</span></Link>
-              <a href="#story-h" className="btn btn-ghost !px-6 !py-3 !text-base">See how the database does it</a>
-            </div>
-            <div className="mt-10 inline-flex items-center gap-4 card px-5 py-3.5 rise-in" style={{ animationDelay: "320ms" }}>
-              <span className="live-dot" aria-hidden="true" />
-              <span>
-                <span className="block text-xs text-muted">Meals saved, live</span>
-                <span className="block text-3xl font-semibold tracking-tight tabular-nums text-leaf">
-                  {s ? <CountUp value={s.meals_saved} format={fmt.n} /> : <span className="text-muted">…</span>}
-                </span>
-              </span>
-              {err && <span className="text-xs text-danger">{err.message}</span>}
-            </div>
-          </div>
-          <motion.div className="relative aspect-square sm:aspect-[5/4] -mx-2 sm:mx-0 lg:-mr-10 lg:-mb-16"
-                      initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15, duration: 1.2, ease }}>
-            <Hero3D bare />
+      {/* ---------- 1. hero: full screen ---------- */}
+      <section className="relative -mt-[68px] min-h-[100dvh] flex flex-col overflow-hidden" aria-labelledby="hero-h">
+        <div className="absolute inset-0 hero-bg" aria-hidden="true" />
+        {/* the 3D town, full bleed */}
+        {/* wide screens: the town fills the whole hero, behind the type */}
+        {wide && (
+          <motion.div className="absolute inset-x-0 top-[6vh] bottom-[4vh]" style={{ y: townY, opacity: townFade }}>
+            <motion.div className="absolute inset-0" initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.15, duration: 1.4, ease }}>
+              <Hero3D bare />
+            </motion.div>
           </motion.div>
+        )}
+        {/* keep the type readable over the scene */}
+        <div className="absolute inset-0 pointer-events-none hero-veil" aria-hidden="true" />
+
+        <div className="relative flex-1 flex flex-col mx-auto w-full max-w-7xl px-5 sm:px-8 pt-28 pointer-events-none">
+          {/* top row: the promise on the left, live proof on the right */}
+          <div className="flex flex-wrap items-start justify-between gap-8">
+            <div className="max-w-md">
+              <motion.h1 id="hero-h" className="text-4xl sm:text-5xl leading-[1.02]"
+                         initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.9, ease }}>
+                Tonight's extra rice <span className="text-glow">reaches a shelter</span> before it spoils.
+              </motion.h1>
+            </div>
+            <motion.div className="bezel pointer-events-auto w-full sm:w-auto" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.9, ease }}>
+              <div className="card px-5 py-4 min-w-[15rem]">
+                <div className="flex items-center gap-2 text-xs text-muted"><span className="live-dot" aria-hidden="true" /> Meals saved, live</div>
+                <div className="mt-2 text-4xl font-semibold tracking-tight tabular-nums text-leaf">
+                  {s ? <CountUp value={s.meals_saved} format={fmt.n} /> : <span className="text-muted">…</span>}
+                </div>
+                {err && <div className="text-xs text-danger mt-1">{err.message}</div>}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* phones: the town gets its own square, so it never sits behind words */}
+          {wide === false && (
+            <div className="relative -mx-5 aspect-square pointer-events-auto" aria-hidden="true">
+              <Hero3D bare />
+            </div>
+          )}
+
+          {/* bottom row: what it is + the two ways in */}
+          <div className="mt-auto pb-4 flex flex-wrap items-end justify-between gap-6">
+            <motion.div className="max-w-lg pointer-events-auto" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.9, ease }}>
+              <p className="text-base sm:text-lg text-muted leading-relaxed">
+                A hostel mess posts its surplus. The database ranks nearby shelters, lets exactly one claim it, and keeps a
+                tamper-evident trail until it is delivered. Every rule lives in MySQL.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Link href="/login" className="btn btn-primary !pl-6 !pr-2 !py-2 !text-base">Open the app <span className="btn-orb !w-9 !h-9 !mr-0" aria-hidden="true">↗</span></Link>
+                <a href="#story-h" className="btn btn-ghost !px-6 !py-3 !text-base glass-bar">See how the database does it</a>
+              </div>
+            </motion.div>
+            <motion.a href="#ticker" className="hidden md:flex flex-col items-center gap-2 text-xs text-muted pointer-events-auto"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2, duration: 0.8 }}>
+              <span>Scroll</span>
+              <span className="scroll-cue" aria-hidden="true" />
+            </motion.a>
           </div>
         </div>
 
+        {/* the wordmark, as wide as the screen */}
+        <motion.div className="relative pointer-events-none select-none pb-[3vw]" style={{ y: markY }} aria-hidden="true">
+          <motion.div className="wordmark display text-center leading-[.78] whitespace-nowrap"
+                      initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 1.3, ease }}>
+            Meal<span className="text-glow">Bridge</span>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ---------- 2. live ticker ---------- */}
       <div id="ticker"><Ticker s={s} /></div>
 
       {/* ---------- 3. statement + live figures ---------- */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24" aria-labelledby="live-h">
-       <div className="slab px-6 py-10 sm:px-12 sm:py-14">
+      <section className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32" aria-labelledby="live-h">
         <motion.p className="display text-3xl sm:text-5xl leading-[1.12] max-w-5xl" {...rise}>
           Food that would be thrown away tonight, <span className="text-glow">matched to a shelter in minutes</span>,
           with every rule enforced by the database itself.
@@ -192,15 +235,13 @@ export default function Landing() {
             ))}
           </div>
         </div>
-       </div>
       </section>
 
       {/* ---------- 4. scroll story: the SQL behind each step ---------- */}
       <ScrollStory />
 
       {/* ---------- 5. the index: every page ---------- */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24" aria-labelledby="index-h">
-       <div className="slab px-6 py-10 sm:px-12 sm:py-14">
+      <section className="mx-auto max-w-7xl px-5 sm:px-8 py-24" aria-labelledby="index-h">
         <motion.div className="flex items-end justify-between flex-wrap gap-4 mb-10" {...rise}>
           <h2 id="index-h" className="text-4xl sm:text-6xl">Every <span className="text-glow">page</span></h2>
           <p className="text-muted max-w-sm text-sm leading-relaxed">
@@ -224,7 +265,6 @@ export default function Landing() {
             </motion.li>
           ))}
         </ol>
-       </div>
       </section>
 
     </div>

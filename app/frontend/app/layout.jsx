@@ -16,8 +16,8 @@ export const metadata = {
   description: "Surplus hostel mess food, matched to nearby shelters before it expires. A database systems project.",
 };
 
-// Runs before the page paints, so a saved dark choice never flashes light.
-const themeScript = `try{if(localStorage.getItem('mb_theme_v2')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}`;
+// Runs before the page paints, so a saved light choice never flashes dark.
+const themeScript = `try{if(localStorage.getItem('mb_theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}`;
 
 export default function RootLayout({ children }) {
   return (

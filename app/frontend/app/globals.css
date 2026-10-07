@@ -31,79 +31,60 @@
   --font-mono: var(--font-mono-family), ui-monospace, SFMono-Regular, monospace;
 }
 
-/* ---- light (default): "pastel glass" ---------------------------------
-   Every colour is taken from the background wash itself: deep sage/olive
-   is the primary (buttons, active states, "food saved"), apricot is the
-   accent (the key phrase, counters, badges), blush is the third colour
-   (expired, soft highlights). Text is warm charcoal-brown, never pure
-   black; cards are white frosted glass. */
+/* ---- dark (default): "night kitchen" ---------------------------------
+   Warm espresso neutrals (one gray family, all tinted brown), cream ink,
+   ONE accent (saffron, the kitchen fire). Leaf green is kept only as the
+   semantic "food saved" colour; danger/warn/sky only for statuses. */
 :root {
-  --bg: #ece6dc;
-  --surface: #fbf8f3;
-  --surface-2: rgba(255, 255, 255, .55);
-  --ink: #3a2f28;                       /* warm charcoal-brown: 11:1 on white */
-  --muted: #6e6259;                     /* 5.9:1 on white */
-  --line: rgba(255, 255, 255, .75);
-  --rule: rgba(58, 47, 40, .10);
-  --accent: #a65a32;                    /* apricot, deep enough for text: 5.0:1 on white */
-  --accent-2: #e5a57c;                  /* light apricot for glows and trails */
-  --accent-ink: #ffffff;
-  --btn: #5b6a46;                       /* sage/olive primary buttons, white text 5.7:1 */
-  --btn-ink: #ffffff;
-  --blush: #c97a6c;
-  --leaf: #4f6340;                      /* sage: delivered, food saved */
-  --danger: #a5544a;                    /* blush-terracotta: expired, refused */
-  --warn: #8a6514;
-  --sky: #5d7480;
-  --violet: #a65a32;
-  --glass: rgba(255, 255, 255, .42);
-  --glass-strong: rgba(255, 255, 255, .72);
-  --glass-edge: rgba(255, 255, 255, .85);
-  --shell: rgba(255, 255, 255, .22);
-  --shadow-tint: 80, 60, 40;
-  --glow: 0 10px 24px -14px rgba(60, 72, 44, .6), inset 0 1px 0 rgba(255,255,255,.18);
+  --bg: #0f0d0b;
+  --surface: #171411;
+  --surface-2: #211d19;
+  --ink: #f3ede4;
+  --muted: #a69c8f;
+  --line: #2f2a24;
+  --accent: #ec8a42;        /* saffron, desaturated so it glows instead of shouting */
+  --accent-2: #c9682a;      /* the same saffron one step deeper (never a second hue) */
+  --accent-ink: #1b0f06;    /* text on saffron: 7:1 */
+  --leaf: #6cc495;          /* food saved */
+  --danger: #e8705f;
+  --warn: #e2b450;
+  --sky: #86acd6;
+  --violet: #ec8a42;        /* retired: mapped to the accent so nothing turns purple */
+  --glass: rgba(23, 20, 17, .78);
+  --glass-edge: rgba(255, 240, 220, .06);
+  --shell: rgba(255, 236, 210, .025);
+  --shadow-tint: 24, 12, 2;
+  --glow: 0 10px 28px -12px rgba(236,138,66,.55), inset 0 1px 0 rgba(255,255,255,.22);
   --ease: cubic-bezier(.32,.72,0,1);
-  /* the wash */
-  --wash-sage: #a9b591; --wash-beige: #d9d1c4; --wash-blush: #eab3a6; --wash-peach: #f3c49a;
-  /* the 3D town in the same pastels */
-  --town-mess: #eaa57c; --town-shelter: #9fb084; --town-route: #e6a99c;
-  /* charts, 3:1 or better on the glass (#f3efe9): sage 3.4, blush 3.1, apricot 3.0 */
-  --chart-1: #6f8459; --chart-2: #bf6f62; --chart-3: #b07a46;
-  --tk-kw: #a65a32; --tk-str: #4f6340; --tk-num: #8a6514; --tk-com: #8a8378; --tk-obj: #5d7480;
-  color-scheme: light;
+  --chart-1: #319a5e; --chart-2: #e05f1a; --chart-3: #5592d4;
+  --tk-kw: #f2a061; --tk-str: #93d4ac; --tk-num: #e8c46a; --tk-com: #7a7064; --tk-obj: #a9c3e2;
+  color-scheme: dark;
 }
 
-/* ---- dark (chosen with the toggle): the same pastels on a deep wash */
-:root[data-theme="dark"] {
-  --bg: #1a1814;
-  --surface: #22201b;
-  --surface-2: rgba(255, 255, 255, .07);
-  --ink: #efe6da;
-  --muted: #b0a597;
-  --line: rgba(255, 255, 255, .12);
-  --rule: rgba(255, 255, 255, .08);
-  --accent: #f0b48a;
-  --accent-2: #e9a28f;
-  --accent-ink: #2a1d14;
-  --btn: #b4c49a;                       /* light sage buttons, dark text */
-  --btn-ink: #1d2215;
-  --blush: #e7a497;
-  --leaf: #b4c49a;
-  --danger: #e7a497;
-  --warn: #dcbc72;
-  --sky: #a3b8c2;
-  --violet: #f0b48a;
-  --glass: rgba(255, 255, 255, .06);
-  --glass-strong: rgba(34, 31, 26, .86);
-  --glass-edge: rgba(255, 255, 255, .10);
-  --shell: rgba(255, 255, 255, .03);
-  --shadow-tint: 0, 0, 0;
-  --glow: 0 10px 28px -14px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.25);
-  --wash-sage: #3a4430; --wash-beige: #2a2620; --wash-blush: #4a2f2a; --wash-peach: #4d3826;
-  --town-mess: #f0b48a; --town-shelter: #b4c49a; --town-route: #e9a28f;
-  --chart-1: #a7ba8e; --chart-2: #e3998b; --chart-3: #e2b07f;
-  --tk-kw: #f0b48a; --tk-str: #b4c49a; --tk-num: #dcbc72; --tk-com: #7a7064; --tk-obj: #a3b8c2;
-  color-scheme: dark;
+/* ---- light (chosen with the toggle): warm paper ---------------------- */
+:root[data-theme="light"] {
+  --bg: #f6f1e8;
+  --surface: #fffdf8;
+  --surface-2: #eee6d8;
+  --ink: #1d1914;
+  --muted: #6b6256;
+  --line: #e2d8c7;
+  --accent: #b5561a;        /* white text on it is 5:1 */
+  --accent-2: #974512;
+  --accent-ink: #ffffff;
+  --leaf: #2e7a50;
+  --danger: #b3392e;
+  --warn: #8f5f00;
+  --sky: #2f5f96;
+  --violet: #b5561a;
+  --glass: rgba(255, 253, 248, .82);
+  --glass-edge: rgba(255, 255, 255, .9);
+  --shell: rgba(60, 40, 10, .03);
+  --shadow-tint: 90, 60, 20;
+  --glow: 0 10px 24px -12px rgba(181,86,26,.5), inset 0 1px 0 rgba(255,255,255,.25);
+  --chart-1: #2b7a4b; --chart-2: #d9480f; --chart-3: #2f6fb0;
+  --tk-kw: #b5561a; --tk-str: #2e7a50; --tk-num: #8f5f00; --tk-com: #8f8577; --tk-obj: #2f5f96;
+  color-scheme: light;
 }
 
 html { background: var(--bg); color: var(--ink); scroll-behavior: smooth; }
@@ -143,8 +124,8 @@ p { text-wrap: pretty; }
        transition: transform .35s var(--ease), background .25s var(--ease), box-shadow .35s var(--ease), border-color .25s, opacity .2s, color .2s; }
 .btn:active:not(:disabled) { transform: scale(.98) translateY(1px); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
-.btn-primary { background: var(--btn); color: var(--btn-ink); box-shadow: var(--glow); }
-.btn-primary:hover:not(:disabled) { background: color-mix(in oklab, var(--btn) 82%, var(--btn-ink)); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: var(--glow); }
+.btn-primary:hover:not(:disabled) { background: color-mix(in oklab, var(--accent) 88%, white); }
 .btn-ghost { border: 1px solid var(--line); background: transparent; }
 .btn-ghost:hover:not(:disabled) { background: var(--surface-2); border-color: color-mix(in oklab, var(--ink) 18%, var(--line)); }
 /* button-in-button: a trailing arrow lives in its own little circle */
@@ -302,7 +283,7 @@ p { text-wrap: pretty; }
                      background: var(--accent); animation: cue 1.8s cubic-bezier(.32,.72,0,1) infinite; }
 @keyframes cue { to { top: 100%; } }
 
-/* index rows: a glass wash slides in from the left on hover */
+/* index rows: a saffron wash slides in from the left on hover */
 .index-row { position: relative; isolation: isolate; }
 .index-row::before { content: ""; position: absolute; inset: 0; z-index: -1; transform: scaleX(0); transform-origin: left;
   background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 9%, transparent), transparent 80%);
@@ -313,83 +294,3 @@ p { text-wrap: pretty; }
    inside a single-column (phone) grid stretched the whole page sideways.
    In the base layer, so any min-w-* utility still wins. */
 @layer base { .grid > * { min-width: 0; } }
-
-
-/* =====================================================================
-   Pastel glass layer (7 October 2026). Later rules override the
-   earlier look; tokens are at the top of this file.
-   Performance: the wash is a FIXED layer of plain radial gradients, so
-   panels can be translucent without backdrop-filter (the wash behind them
-   is already soft, so a blur would look the same and cost GPU memory on
-   every scroll). Real backdrop blur is used only on the fixed nav bar,
-   the menu, dialogs and the Under the hood panel.
-   ===================================================================== */
-
-/* the wash: four out-of-focus colour pools on beige */
-.aurora { background: var(--bg); }
-.aurora i { opacity: 1; filter: none; }
-.aurora i:nth-child(1) { width: 85vmax; height: 85vmax; left: -30vmax; top: auto; bottom: -45vmax;
-  background: radial-gradient(closest-side, var(--wash-sage), transparent); animation: drift1 40s ease-in-out infinite alternate; }
-.aurora i:nth-child(2) { width: 80vmax; height: 80vmax; right: -28vmax; left: auto; top: -38vmax; bottom: auto;
-  background: radial-gradient(closest-side, var(--wash-blush), transparent); animation: drift2 46s ease-in-out infinite alternate; }
-.aurora i:nth-child(3) { width: 75vmax; height: 75vmax; right: -25vmax; left: auto; bottom: -40vmax; top: auto;
-  background: radial-gradient(closest-side, var(--wash-peach), transparent); animation: drift3 52s ease-in-out infinite alternate; }
-.aurora::before { content: ""; position: absolute; left: 20vw; top: 18vh; width: 60vw; height: 60vh; border-radius: 50%;
-  background: radial-gradient(closest-side, var(--wash-beige), transparent); }
-:root[data-theme="light"] .aurora i, :root:not([data-theme]) .aurora i { opacity: 1; }
-.aurora::after { opacity: .05; }
-
-/* frosted glass panels: translucent white, white hairline, almost no shadow */
-.card { background: var(--glass); border: 1px solid var(--line); border-radius: 28px;
-        box-shadow: inset 0 1px 0 var(--glass-edge), 0 20px 50px -40px rgba(var(--shadow-tint), .45); }
-.bezel { padding: 8px; border-radius: 40px; background: var(--shell); border: 1px solid var(--line); }
-.bezel > .card { border-radius: 32px; }
-.card-lift:hover { border-color: var(--glass-edge); transform: translateY(-3px);
-  box-shadow: inset 0 1px 0 var(--glass-edge), 0 26px 50px -30px rgba(var(--shadow-tint), .55); }
-.card-glow::before { display: none; }
-.chip { background: var(--surface-2); border-color: var(--line); border-radius: 9px; color: var(--muted); }
-
-/* inputs and SQL read as slightly stronger glass */
-.input { background: var(--glass-strong); border-color: var(--line); border-radius: 14px; }
-.sql { background: var(--glass-strong); border-color: var(--line); border-radius: 14px; }
-.skeleton { background: linear-gradient(90deg, var(--surface-2) 25%, var(--glass-strong) 50%, var(--surface-2) 75%);
-            background-size: 200% 100%; border-radius: 22px; }
-
-/* thin dividers inside panels (Tailwind border-line utilities) */
-.border-line { border-color: var(--rule) !important; }
-
-/* the fixed bar and overlays get the real blur */
-.glass-bar { background: color-mix(in oklab, var(--glass-strong) 80%, transparent);
-  backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%); }
-header .glass-bar { border-color: var(--line); }
-
-/* hero: keep type readable over the 3D town */
-.hero-bg { background: none; }
-.hero-veil { background:
-  linear-gradient(to bottom, color-mix(in oklab, var(--bg) 55%, transparent) 0%, transparent 30%,
-                  transparent 64%, color-mix(in oklab, var(--bg) 55%, transparent) 100%); }
-
-/* index rows: a glass wash on hover */
-.index-row::before { background: linear-gradient(90deg, var(--glass-strong), transparent 85%); }
-
-
-/* recolour (7 October 2026): secondary buttons are white glass with near-black
-   text; the little arrow circle inverts against its button */
-.btn-ghost { background: var(--glass-strong); border-color: var(--line); }   /* no colour here, so text-danger etc. still apply */
-.btn-ghost:hover:not(:disabled) { background: var(--surface); border-color: var(--glass-edge); }
-.btn-primary .btn-orb { background: color-mix(in oklab, var(--btn-ink) 18%, transparent); }
-.btn-ghost .btn-orb { background: var(--btn); color: var(--btn-ink); }
-
-/* the big rounded glass slab that groups a whole section (reference look) */
-.slab { position: relative; background: var(--glass); border: 1px solid var(--line); border-radius: 44px;
-        box-shadow: inset 0 1px 0 var(--glass-edge), 0 40px 90px -70px rgba(var(--shadow-tint), .55); }
-@media (max-width: 639px) { .slab { border-radius: 30px; } }
-/* the wordmark under the hero slab: big, but sized to the column */
-.wordmark { font-size: clamp(3.6rem, 15vw, 15rem); }
-
-/* entrance for the hero text: pure CSS, so the words are painted (and visible)
-   even before the page's JavaScript has loaded */
-.rise-in { animation: risein .8s cubic-bezier(.32,.72,0,1) both; }
-@keyframes risein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-/* the wordmark as the hero box's title: sized to the inside of the box */
-.wordmark-hero { font-size: clamp(3rem, 11.5vw, 10.5rem); text-align: left; }

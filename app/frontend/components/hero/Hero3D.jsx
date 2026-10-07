@@ -50,12 +50,7 @@ export function RouteArt() {
 export default function Hero3D({ bare = false, className = "" }) {
   const box = useRef(null);
   const reduced = usePrefersReducedMotion();
-  const raw = useThemeColors(["bg", "surface", "surface-2", "line", "ink", "accent", "accent-2", "leaf", "sky",
-                              "town-mess", "town-shelter", "town-route"]);
-  // the scene paints messes with "accent", shelters with "leaf" and routes with
-  // "accent-2"; feed it the soft pastel town colours instead of the UI accents
-  const colors = { ...raw, accent: raw["town-mess"] || raw.accent, leaf: raw["town-shelter"] || raw.leaf,
-                   "accent-2": raw["town-route"] || raw["accent-2"] };
+  const colors = useThemeColors(["bg", "surface", "surface-2", "line", "ink", "accent", "accent-2", "leaf", "sky"]);
   const [gl, setGl] = useState(null);          // null = not checked yet
   const [onScreen, setOnScreen] = useState(true);
   const [lost, setLost] = useState(false);       // GPU context lost: show the flat drawing
@@ -71,7 +66,7 @@ export default function Hero3D({ bare = false, className = "" }) {
   return (
     <figure className={bare ? `absolute inset-0 m-0 ${className}` : "relative"}>
       <div ref={box} className={bare ? "absolute inset-0" : "relative aspect-[5/4] w-full"} role="img"
-           aria-label="Illustration: red hostel messes send parcels of food along arcs to green shelters">
+           aria-label="Illustration: saffron hostel messes send parcels of food along arcs to green shelters">
         {gl === false || lost ? (
           <div className="absolute inset-0 flex items-center"><RouteArt /></div>
         ) : gl && colors.accent ? (

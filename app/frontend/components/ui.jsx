@@ -37,7 +37,7 @@ export function useNow(intervalMs = 1000) {
 
 /* ---- perishability countdown ring --------------------------------------
    fraction = time left / total safe window (cooked_at -> safe_until,
-   both decided by MySQL's trigger). Colour moves leaf -> warn -> danger. */
+   both decided by MySQL's trigger). Colour moves leaf -> saffron -> red. */
 export function CountdownRing({ secondsLeft, totalSeconds, size = 76, label = true }) {
   const left = Math.max(0, secondsLeft);
   const frac = totalSeconds > 0 ? Math.min(1, left / totalSeconds) : 0;

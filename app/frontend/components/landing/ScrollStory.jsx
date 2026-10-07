@@ -146,17 +146,29 @@ export default function ScrollStory() {
   const pinned = wide && !reduced;
   useEffect(() => {
     if (!pinned || !section.current) return;
-    // progress 0..1 across the tall section -> step 0..3 and the bar width
-    const st = ScrollTrigger.create({
-      trigger: section.current,
-      start: "top top+=64",          // 64 px = the sticky header
-      end: "bottom bottom",
-      onUpdate: (self) => {
-        setStep(Math.min(STORY.length - 1, Math.floor(self.progress * STORY.length)));
-        if (bar.current) bar.current.style.transform = `scaleX(${self.progress})`;
-      },
-    });
-    return () => st.kill();
+    // progress 0..1 across the tall section -> step 0..3 and the bar width.
+    // Measured from the section's live position on every scroll frame, not
+    // from start/end offsets cached at mount: the live figures and charts
+    // above it load after the page appears and push the section down, and
+    // cached offsets then left the story stuck on step 1 ("Post").
+    // (straight from the scroll event: one getBoundingClientRect per event is
+    // cheap, and setStep with an unchanged value does not re-render)
+    const update = () => {
+      const el = section.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const travel = r.height - (window.innerHeight - 64);          // 64 px = the sticky header
+      const p = travel > 0 ? Math.min(1, Math.max(0, (64 - r.top) / travel)) : 0;
+      setStep(Math.min(STORY.length - 1, Math.floor(p * STORY.length)));
+      if (bar.current) bar.current.style.transform = `scaleX(${p})`;
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, [pinned]);
 
   const s = STORY[step];
@@ -182,7 +194,7 @@ export default function ScrollStory() {
                     <button
                       onClick={() => {
                         const top = section.current.getBoundingClientRect().top + window.scrollY - 64;
-                        window.scrollTo({ top: top + (i + 0.5) * (section.current.offsetHeight - window.innerHeight) / STORY.length });
+                        window.scrollTo({ top: top + (i + 0.5) * (section.current.offsetHeight - (window.innerHeight - 64)) / STORY.length, behavior: "smooth" });
                       }}
                       aria-current={i === step ? "step" : undefined}
                       className={`w-full text-left px-3 py-2 rounded-xl transition-colors ${i === step ? "bg-surface-2" : "text-muted hover:text-ink"}`}>

@@ -19,7 +19,6 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { Skeleton } from "@/components/ui";
 import Hero3D from "@/components/hero/Hero3D";
 import ScrollStory from "@/components/landing/ScrollStory";
-import SmoothScroll from "@/components/motion/SmoothScroll";
 import CountUp from "@/components/motion/CountUp";
 import { api, fmt } from "@/lib/api";
 
@@ -98,7 +97,6 @@ export default function Landing() {
 
   return (
     <div>
-      <SmoothScroll />
 
       {/* ---------- 1. hero: full screen ---------- */}
       <section className="relative -mt-[68px] min-h-[100dvh] flex flex-col overflow-hidden" aria-labelledby="hero-h">

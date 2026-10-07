@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { MotionConfig, motion } from "motion/react";
 import HoodPanel from "./HoodPanel";
 import SiteIndex, { MenuButton } from "./SiteIndex";
+import Cloche from "./motion/Cloche";
 import { getSession, hoodStore, sessionStore, setSession, toastStore, useStore } from "@/lib/api";
 
 const HOME = { MESS_ADMIN: "/mess", SHELTER: "/shelter", VOLUNTEER: "/volunteer", PLATFORM_ADMIN: "/admin" };
@@ -172,12 +173,17 @@ export default function Shell({ children }) {
       {/* page transition: a new key per route replays the enter animation.
           Only opacity and y: a leftover filter/transform would trap the
           position:fixed modals inside pages. */}
+      {/* the new page is set down like a tray: it arrives tilted away in 3D
+          and settles flat as the cloche (below) is lifted off. Ends at
+          identity, so no transform is left that could trap fixed dialogs. */}
       <motion.main id="main" key={path}
-                   initial={{ opacity: 0, y: 10 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+                   style={{ transformPerspective: 1400, transformOrigin: "50% 0%" }}
+                   initial={{ opacity: 0, y: 70, rotateX: 14, scale: 0.97 }}
+                   animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+                   transition={{ duration: 0.75, delay: 0.42, ease: [0.32, 0.72, 0, 1] }}>
         {children}
       </motion.main>
+      <Cloche path={path} />
       <HoodPanel open={hood} onClose={() => setHood(false)} />
       {hood && <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setHood(false)} aria-hidden="true" />}
       <Toast />

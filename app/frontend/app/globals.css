@@ -391,3 +391,5 @@ header .glass-bar { border-color: var(--line); }
    even before the page's JavaScript has loaded */
 .rise-in { animation: risein .8s cubic-bezier(.32,.72,0,1) both; }
 @keyframes risein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+/* the wordmark as the hero box's title: sized to the inside of the box */
+.wordmark-hero { font-size: clamp(3rem, 11.5vw, 10.5rem); text-align: left; }

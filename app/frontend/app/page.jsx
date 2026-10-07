@@ -3,7 +3,7 @@
    Landing page, laid out like an editorial / luxury brand site.
    1. Hero: one big glass slab, words left and the 3D town right (stacked
       on phones; they never overlap), live "meals saved" from MySQL, and the
-      MealBridge wordmark under the slab.
+      MealBridge wordmark as the box's title across its top.
    2. Ticker: every live figure from v_impact_summary, running sideways.
    3. Statement + the daily delivered chart and the other live figures.
    4. Scroll story (components/landing/ScrollStory): the real SQL behind
@@ -90,7 +90,13 @@ export default function Landing() {
           top, right and bottom edges, like a dish breaking out of a card).
           On phones the town stacks under the words. */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 pt-8 sm:pt-12 pb-6" aria-labelledby="hero-h">
-        <div className="slab relative grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-6 lg:gap-2 px-6 py-10 sm:px-12 sm:py-14 lg:min-h-[640px]">
+        <div className="slab relative px-6 pt-8 pb-10 sm:px-12 sm:pt-10 sm:pb-14">
+          {/* the title of the box: the MealBridge wordmark across the top, in its
+              own row, so it never sits over the 3D town below it */}
+          <div className="wordmark wordmark-hero display leading-[.9] whitespace-nowrap select-none rise-in" style={{ animationDelay: "60ms" }}>
+            Meal<span className="text-glow">Bridge</span>
+          </div>
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-line grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-6 lg:gap-2 lg:min-h-[520px]">
           <div className="relative z-10 lg:pr-4">
             <h1 id="hero-h" className="text-[2.6rem] sm:text-6xl leading-[1.02] rise-in">
               Tonight's extra rice <span className="text-glow">reaches a shelter</span> before it spoils.
@@ -114,16 +120,13 @@ export default function Landing() {
               {err && <span className="text-xs text-danger">{err.message}</span>}
             </div>
           </div>
-          <motion.div className="relative aspect-square sm:aspect-[5/4] -mx-2 sm:mx-0 lg:-mr-10"
+          <motion.div className="relative aspect-square sm:aspect-[5/4] -mx-2 sm:mx-0 lg:-mr-10 lg:-mb-16"
                       initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15, duration: 1.2, ease }}>
             <Hero3D bare />
           </motion.div>
+          </div>
         </div>
 
-        {/* the wordmark, under the slab, never over the animation */}
-        <div className="wordmark display text-center leading-[.85] whitespace-nowrap select-none mt-8 sm:mt-12 rise-in" aria-hidden="true" style={{ animationDelay: "200ms" }}>
-          Meal<span className="text-glow">Bridge</span>
-        </div>
       </section>
 
       {/* ---------- 2. live ticker ---------- */}

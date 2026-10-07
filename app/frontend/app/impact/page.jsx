@@ -22,8 +22,7 @@ function Panel({ title, view, block, children, className = "" }) {
       {!block && <Skeleton className="h-56" />}
       {block?.denied && (
         <div className="h-48 flex flex-col items-center justify-center text-center rounded-xl bg-surface-2 p-4">
-          <div className="text-2xl" aria-hidden="true">🔒</div>
-          <p className="font-semibold mt-2">Your role is not granted this view</p>
+          <p className="font-semibold">Your role is not granted this view</p>
           <p className="text-xs text-muted font-mono mt-1 max-w-md">{block.denied}</p>
         </div>
       )}

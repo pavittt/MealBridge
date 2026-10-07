@@ -49,7 +49,7 @@ function StopRow({ trip, s, onDone }) {
       <div className="flex flex-wrap justify-between gap-2">
         <div>
           <div className="font-semibold">{s.stop_type === "PICKUP" ? "Pick up at" : "Drop at"} {s.name}</div>
-          <div className="text-xs text-muted">ETA {fmt.time(s.planned_eta)}{done ? ` · done ${fmt.time(s.departed_at)}` : ""} · ☎ {s.contact_phone}</div>
+          <div className="text-xs text-muted">ETA {fmt.time(s.planned_eta)}{done ? ` · done ${fmt.time(s.departed_at)}` : ""} · {s.contact_phone}</div>
           <div className="text-xs mt-1">{items.map((i) => `#${i.batch_id} ${i.description} (${i.quantity_kg} kg)`).join(" · ")}</div>
         </div>
       </div>

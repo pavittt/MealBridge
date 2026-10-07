@@ -61,7 +61,7 @@ function Ticker({ s }) {
         <span key={l} className="flex items-baseline gap-3 whitespace-nowrap">
           <span className="display text-3xl sm:text-4xl text-glow">{v}</span>
           <span className="text-sm text-muted">{l}</span>
-          <span className="text-accent/60 text-lg" aria-hidden="true">✳</span>
+          <span className="text-accent/60 text-lg" aria-hidden="true">•</span>
         </span>
       ))}
     </div>

@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 import { PageHeader, Skeleton, StatusChip, SynthNote, useRequireRole } from "@/components/ui";
 import { api, fmt, toast } from "@/lib/api";
 
-const ICON = { COOKED: "🍳", PACKED: "📦", POSTED: "📣", CLAIMED: "🤝", PICKED_UP: "🛵", HYGIENE_CHECK: "🌡", DELIVERED: "✅", REJECTED: "⛔", EXPIRED: "⏰", CANCELLED: "↩" };
+const ICON = { COOKED: "CK", PACKED: "PK", POSTED: "PO", CLAIMED: "CL", PICKED_UP: "PU", HYGIENE_CHECK: "HY", DELIVERED: "OK", REJECTED: "RJ", EXPIRED: "EX", CANCELLED: "CX" };
 
 export default function CustodyPage() {
   const user = useRequireRole();
@@ -56,7 +56,7 @@ export default function CustodyPage() {
             {d.events.map((e, i) => (
               <li key={e.event_id} className="relative pl-12 pb-6">
                 {i < d.events.length - 1 && <span className="absolute left-[18px] top-9 bottom-0 w-px bg-line" aria-hidden="true" />}
-                <span className="absolute left-0 top-0 w-9 h-9 rounded-full bg-surface-2 border border-line flex items-center justify-center text-base" aria-hidden="true">{ICON[e.event_type] || "•"}</span>
+                <span className="absolute left-0 top-0 w-9 h-9 rounded-full bg-surface-2 border border-line flex items-center justify-center text-[10px] font-bold font-mono" aria-hidden="true">{ICON[e.event_type] || "•"}</span>
                 <div className="card p-4">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h3 className="font-bold">{fmt.title(e.event_type)}</h3>

@@ -46,7 +46,7 @@ function CapacityCard({ today, onSaved }) {
         <form onSubmit={save} className="mt-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div><label className="label" htmlFor="mn">Meals needed</label><input id="mn" className="input" type="number" min="0" value={v.meals_needed} onChange={(e) => setV({ ...v, meals_needed: e.target.value })} /></div>
-            <div><label className="label" htmlFor="ck">Capacity kg</label><input id="ck" className="input" type="number" step="0.5" min="0.5" value={v.capacity_kg} onChange={(e) => setV({ ...v, capacity_kg: e.target.value })} /></div>
+            <div><label className="label" htmlFor="ck">Capacity kg</label><input id="ck" className="input" type="number" step="0.01" min="0.01" value={v.capacity_kg} onChange={(e) => setV({ ...v, capacity_kg: e.target.value })} /></div>
           </div>
           <ErrorBox error={err} />
           <button className="btn btn-primary w-full">Save</button>

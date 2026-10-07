@@ -36,11 +36,14 @@ if os.path.isdir(config.DIAGRAM_DIR):
 #   1142/1143/1370 privilege denied -> 403   (the MySQL role said no)
 #   1644 SIGNAL from a procedure/trigger -> 400 (a business rule said no)
 #   3819 CHECK constraint violated -> 400
+#   1452 foreign key (e.g. an unknown diet tag), 1264 value out of range,
+#   1406 text too long, 1048 NULL not allowed -> 400 (bad input, not a crash)
 #   1062 duplicate key -> 409
 # ---------------------------------------------------------------------------
 @app.exception_handler(DbError)
 async def db_error(request: Request, exc: DbError):
-    status = {1142: 403, 1143: 403, 1370: 403, 1644: 400, 3819: 400, 1062: 409}.get(exc.code, 500)
+    status = {1142: 403, 1143: 403, 1370: 403, 1644: 400, 3819: 400,
+              1452: 400, 1264: 400, 1406: 400, 1048: 400, 1062: 409}.get(exc.code, 500)
     db = getattr(request.state, "db", None)
     return JSONResponse(status_code=status, content={
         "detail": {"message": exc.message, "mysql_error": exc.code,

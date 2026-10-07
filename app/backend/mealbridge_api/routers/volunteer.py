@@ -59,8 +59,10 @@ class TripIn(BaseModel):
 @router.post("/trips")
 def create_trip(body: TripIn, user=Depends(VOL), db=Depends(role_db)):
     import json
+    # the same claim ticked twice would hit tmp_trip_claims' primary key
+    claim_ids = list(dict.fromkeys(body.claim_ids))
     start = body.planned_start or db.one("SELECT NOW() AS n")["n"]
-    _, out = db.call("sp_create_trip", [user["uid"], json.dumps(body.claim_ids), start], outs=["trip_id"])
+    _, out = db.call("sp_create_trip", [user["uid"], json.dumps(claim_ids), start], outs=["trip_id"])
     return ok(db, {"trip_id": out["trip_id"]}, action="create_trip")
 
 

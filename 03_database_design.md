@@ -250,7 +250,7 @@ Every item that this section listed as "carried into Stage 4" is now built and t
 | Feed, impact and fairness views | 8 views in [`sql/06_views.sql`](sql/06_views.sql) | V1 to V5 |
 | Synthetic data | [`tools/gen_seed.py`](tools/gen_seed.py), labelled SYNTHETIC | |
 | Index before/after | invisible-index EXPLAIN on 200,000 rows | `12_explain_indexes.output.md` |
-| Role-based access (R8 grants) | 4 MySQL roles in [`sql/08_roles_grants.sql`](sql/08_roles_grants.sql) | `14_rbac_tests.output.md`, 51 of 51 pass |
+| Role-based access (R8 grants) | 4 MySQL roles in [`sql/08_roles_grants.sql`](sql/08_roles_grants.sql) | `14_rbac_tests.output.md`, 67 of 67 pass |
 
 Two implementation details differ from what this document assumed:
 

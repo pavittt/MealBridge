@@ -367,8 +367,9 @@ END$$
 -- batches. Uses the real sp_create_trip for stop order and ETAs, then
 -- fills in the historical arrival times, custody events and outcome.
 -- Volunteer = verified, available, can carry the load, fewest trips so
--- far (spreads the work). Food arriving after safe_until, or the batch
--- listed in p_fail_batch, fails the hygiene check.
+-- far (spreads the work). Food handed over (arrival + 4 min) after
+-- safe_until, or the batch listed in p_fail_batch, fails the hygiene
+-- check: the same rule sp_record_delivery applies to live deliveries.
 CREATE PROCEDURE seed_trip(p_batches JSON, p_start DATETIME, p_fail_batch INT UNSIGNED, p_temp_drop DECIMAL(4,1))
 proc: BEGIN
   DECLARE v_claims JSON; DECLARE v_load DECIMAL(9,2); DECLARE v_vol INT UNSIGNED;
@@ -435,8 +436,8 @@ proc: BEGIN
              (SELECT user_id FROM app_user WHERE site_id = c.shelter_site_id AND role = 'SHELTER' LIMIT 1),
              CASE WHEN b.batch_id = p_fail_batch THEN p_temp_drop
                   WHEN b.storage = 'HOT_HELD' THEN 62.0 WHEN b.storage = 'CHILLED' THEN 6.0 ELSE 30.0 END,
-             (v_arr < b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0)),
-             CASE WHEN v_arr >= b.safe_until THEN 'arrived after safe-until time'
+             (v_arr + INTERVAL 4 MINUTE <= b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0)),
+             CASE WHEN v_arr + INTERVAL 4 MINUTE > b.safe_until THEN 'arrived after safe-until time'
                   WHEN b.batch_id = p_fail_batch THEN 'hot food below 60 C on arrival' END
         FROM trip_item ti JOIN claim c ON c.claim_id = ti.claim_id JOIN surplus_batch b ON b.batch_id = c.batch_id
        WHERE ti.trip_id = v_trip AND ti.drop_seq = v_seq;
@@ -444,14 +445,14 @@ proc: BEGIN
       SELECT c.batch_id, c.claim_id, v_trip, 'DELIVERED', v_arr + INTERVAL 4 MINUTE, v_vol
         FROM trip_item ti JOIN claim c ON c.claim_id = ti.claim_id JOIN surplus_batch b ON b.batch_id = c.batch_id
        WHERE ti.trip_id = v_trip AND ti.drop_seq = v_seq
-         AND v_arr < b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0);
+         AND v_arr + INTERVAL 4 MINUTE <= b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0);
       -- outcome is decided first into a temp table: the claim trigger
       -- updates surplus_batch, so the UPDATE itself must not read it (error 1442)
       DROP TEMPORARY TABLE IF EXISTS tmp_outcome;
       CREATE TEMPORARY TABLE tmp_outcome
       SELECT c.claim_id,
-             IF(v_arr < b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0), 'FULFILLED', 'REJECTED') AS new_status,
-             IF(v_arr >= b.safe_until, 'arrived after safe-until time',
+             IF(v_arr + INTERVAL 4 MINUTE <= b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0), 'FULFILLED', 'REJECTED') AS new_status,
+             IF(v_arr + INTERVAL 4 MINUTE > b.safe_until, 'arrived after safe-until time',
                 IF(b.batch_id = p_fail_batch, 'failed hygiene check: temperature', NULL)) AS reason
         FROM trip_item ti JOIN claim c ON c.claim_id = ti.claim_id JOIN surplus_batch b ON b.batch_id = c.batch_id
        WHERE ti.trip_id = v_trip AND ti.drop_seq = v_seq;

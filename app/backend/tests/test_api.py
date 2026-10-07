@@ -177,3 +177,55 @@ def test_schema_explorer():
     kinds = {o["kind"] for o in d["objects"]}
     assert {"PROCEDURE", "FUNCTION", "TRIGGER", "VIEW"} <= kinds
     assert any(c["type"] == "CHECK" for c in d["constraints"])
+
+
+# ---------------------------------------------------------------- audit fixes (7 Oct 2026)
+def test_late_delivery_is_rejected_not_counted():
+    """Food handed over after safe_until must not count as a meal saved.
+    The clock is moved forward with SET timestamp (session only), so the
+    volunteer 'arrives' after the deadline that trg_batch_bi set."""
+    from mealbridge_api.db import DbSession
+    now = client.get("/api/mess/overview", headers=MESS).json()["data"]["server_now"]
+    b = client.post("/api/mess/batches", headers=MESS, json={
+        "category_id": 1, "meal_slot": "DINNER", "description": "SYN pytest late rice",
+        "quantity_kg": 2, "storage": "HOT_HELD", "cooked_at": now, "diet_tags": ["VEG"]}).json()["data"]
+    rank = client.get(f"/api/mess/batches/{b['batch_id']}/ranking", headers=MESS).json()["data"]["ranking"]
+    shelter = [x["shelter_id"] for x in rank if x["verdict"] == "ELIGIBLE"][0]
+    claim = client.post(f"/api/shelter/batches/{b['batch_id']}/claim", headers=shelter_headers(shelter)).json()["data"]
+    trip = client.post("/api/volunteer/trips", headers=VOL, json={"claim_ids": [claim["claim_id"]]}).json()["data"]["trip_id"]
+    assert client.post(f"/api/volunteer/trips/{trip}/stops/1/pickup", headers=VOL, json={}).status_code == 200
+    uid = client.get("/api/auth/me", headers=VOL).json()["data"]["uid"]
+    with DbSession("VOLUNTEER") as db:
+        db.query("SET timestamp = UNIX_TIMESTAMP(%s) + 60", (b["safe_until"],))
+        db.call("sp_record_delivery", [uid, trip, 2, 60, True, None])
+    with DbSession("PLATFORM_ADMIN") as adm:
+        c = adm.one("SELECT status, close_reason FROM claim WHERE claim_id = %s", (claim["claim_id"],))
+        kinds = [e["event_type"] for e in adm.query(
+            "SELECT event_type FROM custody_event WHERE batch_id = %s ORDER BY event_id", (b["batch_id"],))]
+        o = adm.one("SELECT status, meals_saved FROM v_batch_outcome WHERE batch_id = %s", (b["batch_id"],))
+    assert c["status"] == "REJECTED" and c["close_reason"] == "arrived after safe-until time"
+    assert "DELIVERED" not in kinds and kinds[-1] == "REJECTED"
+    assert o["status"] == "CANCELLED" and o["meals_saved"] == 0
+
+
+def test_mess_cannot_rank_other_mess_batch():
+    other = login("mess.b@example.org")
+    mine = client.get("/api/mess/overview", headers=MESS).json()["data"]["batches"][0]["batch_id"]
+    assert client.get(f"/api/mess/batches/{mine}/ranking", headers=other).status_code == 404
+
+
+def test_bad_input_is_400_not_500():
+    now = client.get("/api/mess/overview", headers=MESS).json()["data"]["server_now"]
+    r = client.post("/api/mess/batches", headers=MESS, json={
+        "category_id": 1, "meal_slot": "LUNCH", "description": "SYN pytest bad tag",
+        "quantity_kg": 1, "storage": "HOT_HELD", "cooked_at": now, "diet_tags": ["NOT_A_TAG"]})
+    assert r.status_code == 400 and r.json()["detail"]["mysql_error"] == 1452
+    assert client.put("/api/admin/weights/NOT_A_WEIGHT", headers=ADMIN, json={"weight_value": 0.2}).status_code == 404
+
+
+def test_closed_shelter_is_told_why():
+    closed = login("shelter16@example.org")          # SYN Bagayam Boys Home (closed)
+    batch = client.get("/api/mess/overview", headers=MESS).json()["data"]["batches"][0]["batch_id"]
+    checks = client.get(f"/api/shelter/batches/{batch}/why", headers=closed).json()["data"]["checks"]
+    rule = [c for c in checks if c["code"] == "OPEN"][0]
+    assert rule["passed"] == 0

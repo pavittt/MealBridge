@@ -38,7 +38,9 @@ export function useNow(intervalMs = 1000) {
 /* ---- perishability countdown ring --------------------------------------
    fraction = time left / total safe window (cooked_at -> safe_until,
    both decided by MySQL's trigger). Colour moves leaf -> saffron -> red. */
-export function CountdownRing({ secondsLeft, totalSeconds, size = 76, label = true }) {
+const fmtEnded = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+
+export function CountdownRing({ secondsLeft, totalSeconds, size = 76, label = true, endedText = "expired" }) {
   const left = Math.max(0, secondsLeft);
   const frac = totalSeconds > 0 ? Math.min(1, left / totalSeconds) : 0;
   const r = size / 2 - 6;
@@ -47,11 +49,12 @@ export function CountdownRing({ secondsLeft, totalSeconds, size = 76, label = tr
   const h = Math.floor(left / 3600), m = Math.floor((left % 3600) / 60), s = Math.floor(left % 60);
   // keep the label inside the ring: no space before the "m" on small rings
   const gap = size >= 72 ? " " : "";
-  const text = left <= 0 ? "expired" : h > 0 ? `${h}h${gap}${String(m).padStart(2, "0")}m` : `${m}:${String(s).padStart(2, "0")}`;
-  const fontPx = size >= 72 ? 13 : 11;
+  const text = left <= 0 ? endedText : h > 0 ? `${h}h${gap}${String(m).padStart(2, "0")}m` : `${m}:${String(s).padStart(2, "0")}`;
+  // a longer word ("delivered") steps down a size so it stays inside the ring
+  const fontPx = (size >= 72 ? 13 : 11) - (text.length > 7 ? 2 : 0);
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}
-         role="img" aria-label={left <= 0 ? "Expired" : `${h} hours ${m} minutes of safe time left`}>
+         role="img" aria-label={left <= 0 ? fmtEnded(endedText) : `${h} hours ${m} minutes of safe time left`}>
       <svg width={size} height={size} className="-rotate-90">
         <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--surface-2)" strokeWidth="6" fill="none" />
         <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth="6" fill="none" strokeLinecap="round"

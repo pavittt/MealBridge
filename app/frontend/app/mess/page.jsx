@@ -64,7 +64,7 @@ function PostForm({ options, offset, onPosted }) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="label" htmlFor="qty">Quantity (kg)</label>
-          <input id="qty" className="input" type="number" step="0.5" min="0.5" max="2000" required value={f.quantity_kg} onChange={set("quantity_kg")} />
+          <input id="qty" className="input" type="number" step="0.1" min="0.1" max="2000" required value={f.quantity_kg} onChange={set("quantity_kg")} />
         </div>
         <div>
           <label className="label" htmlFor="slot">Meal</label>
@@ -120,7 +120,9 @@ function BatchCard({ b, now, offset, onRank, onCancel }) {
   const live = ["AVAILABLE", "CLAIMED", "IN_TRANSIT"].includes(b.status);
   return (
     <article className="card p-4 flex gap-4">
-      <CountdownRing secondsLeft={live ? left : 0} totalSeconds={b.safe_window_s} />
+      {/* a delivered or withdrawn batch did not expire: the ring says so */}
+      <CountdownRing secondsLeft={live ? left : 0} totalSeconds={b.safe_window_s}
+                     endedText={live || b.status === "EXPIRED" ? "expired" : b.status === "DELIVERED" ? "delivered" : "closed"} />
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">

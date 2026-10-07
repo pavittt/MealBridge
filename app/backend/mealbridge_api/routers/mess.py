@@ -8,7 +8,7 @@ sp_post_batch and sp_cancel_batch; the role has no INSERT on surplus_batch.
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from ..auth import require, role_db
@@ -95,7 +95,12 @@ def cancel_batch(batch_id: int, user=Depends(MESS), db=Depends(role_db)):
 
 @router.get("/batches/{batch_id}/ranking")
 def ranking(batch_id: int, user=Depends(MESS), db=Depends(role_db)):
-    """The matching procedure: every shelter with its 5 component scores."""
+    """The matching procedure: every shelter with its 5 component scores.
+    Only for this mess's own batches: sp_rank_shelters takes no user id,
+    so the ownership check is done here (no row-level security in MySQL)."""
+    if not db.one("SELECT 1 AS mine FROM surplus_batch WHERE batch_id = %s AND mess_site_id = %s",
+                  (batch_id, user["site"])):
+        raise HTTPException(404, "Not one of your mess's batches")
     rows, _ = db.call("sp_rank_shelters", [batch_id, None])
     weights = None   # r_mess_admin may not read scoring_weight; the panel says so
     return ok(db, {"ranking": rows, "weights": weights})

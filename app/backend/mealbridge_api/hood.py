@@ -88,7 +88,8 @@ ACTIONS = {
     },
     "deliver": {
         "procedure": "sp_record_delivery",
-        "transaction": "START TRANSACTION -> stop departed -> HYGIENE_CHECK event (+ DELIVERED event if passed) "
+        "transaction": "START TRANSACTION -> stop departed -> outcome per claim (passes only if the check passed AND "
+                       "NOW() < safe_until) -> HYGIENE_CHECK event (+ DELIVERED event if passed) "
                        "-> claim FULFILLED or REJECTED -> trip COMPLETED when every stop is done -> COMMIT.",
         "triggers": [
             {"name": "trg_custody_bi", "on": "BEFORE INSERT custody_event", "does": "Extends the hash chain."},

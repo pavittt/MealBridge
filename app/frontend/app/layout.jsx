@@ -17,7 +17,7 @@ export const metadata = {
 };
 
 // Runs before the page paints, so a saved dark choice never flashes light.
-const themeScript = `try{if(localStorage.getItem('mb_theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}`;
+const themeScript = `try{if(localStorage.getItem('mb_theme_v2')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}`;
 
 export default function RootLayout({ children }) {
   return (

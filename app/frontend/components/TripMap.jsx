@@ -25,7 +25,7 @@ export default function TripMap({ home, queue, trip }) {
     <MapContainer center={home ? [home.lat, home.lon] : [12.97, 79.15]} zoom={13} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
       <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {home && (
-        <CircleMarker center={[home.lat, home.lon]} radius={7} pathOptions={{ color: "#4d6a86", fillOpacity: 1 }}>
+        <CircleMarker center={[home.lat, home.lon]} radius={7} pathOptions={{ color: "#5d7480", fillOpacity: 1 }}>
           <Tooltip>Your start point</Tooltip>
         </CircleMarker>
       )}
@@ -34,19 +34,19 @@ export default function TripMap({ home, queue, trip }) {
                   pathOptions={{ color: "#a7a092", weight: 2, dashArray: "4 6" }} />
       ))}
       {!trip && queue.map((q) => (
-        <CircleMarker key={"m" + q.claim_id} center={[q.mess_lat, q.mess_lon]} radius={8} pathOptions={{ color: "#5f7f52", fillOpacity: 0.9 }}>
+        <CircleMarker key={"m" + q.claim_id} center={[q.mess_lat, q.mess_lon]} radius={8} pathOptions={{ color: "#6f8459", fillOpacity: 0.9 }}>
           <Tooltip>{q.mess}: {q.quantity_kg} kg</Tooltip>
         </CircleMarker>
       ))}
       {!trip && queue.map((q) => (
-        <CircleMarker key={"s" + q.claim_id} center={[q.shelter_lat, q.shelter_lon]} radius={8} pathOptions={{ color: "#b3261e", fillOpacity: 0.9 }}>
+        <CircleMarker key={"s" + q.claim_id} center={[q.shelter_lat, q.shelter_lon]} radius={8} pathOptions={{ color: "#bf6f62", fillOpacity: 0.9 }}>
           <Tooltip>{q.shelter}</Tooltip>
         </CircleMarker>
       ))}
-      {trip && <Polyline positions={route} pathOptions={{ color: "#b3261e", weight: 4 }} />}
+      {trip && <Polyline positions={route} pathOptions={{ color: "#bf6f62", weight: 4 }} />}
       {trip && trip.stops.map((s) => (
         <CircleMarker key={s.stop_seq} center={[s.lat, s.lon]} radius={11}
-                      pathOptions={{ color: s.stop_type === "PICKUP" ? "#5f7f52" : "#b3261e", fillOpacity: s.departed_at ? 0.35 : 0.95 }}>
+                      pathOptions={{ color: s.stop_type === "PICKUP" ? "#6f8459" : "#bf6f62", fillOpacity: s.departed_at ? 0.35 : 0.95 }}>
           <Tooltip permanent direction="top" offset={[0, -8]}>{s.stop_seq}. {s.name}</Tooltip>
         </CircleMarker>
       ))}

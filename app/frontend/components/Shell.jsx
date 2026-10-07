@@ -52,10 +52,10 @@ function ThemeToggle() {
   // The light pastel-glass look is the default; the toggle flips to dark and back.
   // The choice is saved in localStorage and applied before paint (layout.jsx).
   const [theme, setTheme] = useState("light");
-  useEffect(() => { try { setTheme(localStorage.getItem("mb_theme") === "dark" ? "dark" : "light"); } catch {} }, []);
+  useEffect(() => { try { setTheme(localStorage.getItem("mb_theme_v2") === "dark" ? "dark" : "light"); } catch {} }, []);
   const apply = (t) => {
     setTheme(t);
-    try { localStorage.setItem("mb_theme", t); } catch {}
+    try { localStorage.setItem("mb_theme_v2", t); } catch {}
     if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
     else document.documentElement.removeAttribute("data-theme");
   };

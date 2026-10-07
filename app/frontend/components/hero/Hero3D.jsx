@@ -50,7 +50,12 @@ export function RouteArt() {
 export default function Hero3D({ bare = false, className = "" }) {
   const box = useRef(null);
   const reduced = usePrefersReducedMotion();
-  const colors = useThemeColors(["bg", "surface", "surface-2", "line", "ink", "accent", "accent-2", "leaf", "sky"]);
+  const raw = useThemeColors(["bg", "surface", "surface-2", "line", "ink", "accent", "accent-2", "leaf", "sky",
+                              "town-mess", "town-shelter", "town-route"]);
+  // the scene paints messes with "accent", shelters with "leaf" and routes with
+  // "accent-2"; feed it the soft pastel town colours instead of the UI accents
+  const colors = { ...raw, accent: raw["town-mess"] || raw.accent, leaf: raw["town-shelter"] || raw.leaf,
+                   "accent-2": raw["town-route"] || raw["accent-2"] };
   const [gl, setGl] = useState(null);          // null = not checked yet
   const [onScreen, setOnScreen] = useState(true);
   const [lost, setLost] = useState(false);       // GPU context lost: show the flat drawing

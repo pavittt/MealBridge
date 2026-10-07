@@ -31,60 +31,68 @@
   --font-mono: var(--font-mono-family), ui-monospace, SFMono-Regular, monospace;
 }
 
-/* ---- dark (default): "night kitchen" ---------------------------------
-   Warm espresso neutrals (one gray family, all tinted brown), cream ink,
-   ONE accent (saffron, the kitchen fire). Leaf green is kept only as the
-   semantic "food saved" colour; danger/warn/sky only for statuses. */
+/* ---- light (default): "pastel glass" ---------------------------------
+   A soft out-of-focus wash of sage, beige, blush and peach behind frosted
+   white glass panels. Type and buttons are unchanged: Fraunces / Geist and
+   the saffron pill buttons. Leaf green stays the semantic "food saved";
+   danger/warn/sky only mark statuses. */
 :root {
-  --bg: #0f0d0b;
-  --surface: #171411;
-  --surface-2: #211d19;
-  --ink: #f3ede4;
-  --muted: #a69c8f;
-  --line: #2f2a24;
-  --accent: #ec8a42;        /* saffron, desaturated so it glows instead of shouting */
-  --accent-2: #c9682a;      /* the same saffron one step deeper (never a second hue) */
-  --accent-ink: #1b0f06;    /* text on saffron: 7:1 */
-  --leaf: #6cc495;          /* food saved */
-  --danger: #e8705f;
-  --warn: #e2b450;
-  --sky: #86acd6;
-  --violet: #ec8a42;        /* retired: mapped to the accent so nothing turns purple */
-  --glass: rgba(23, 20, 17, .78);
-  --glass-edge: rgba(255, 240, 220, .06);
-  --shell: rgba(255, 236, 210, .025);
-  --shadow-tint: 24, 12, 2;
-  --glow: 0 10px 28px -12px rgba(236,138,66,.55), inset 0 1px 0 rgba(255,255,255,.22);
-  --ease: cubic-bezier(.32,.72,0,1);
-  --chart-1: #319a5e; --chart-2: #e05f1a; --chart-3: #5592d4;
-  --tk-kw: #f2a061; --tk-str: #93d4ac; --tk-num: #e8c46a; --tk-com: #7a7064; --tk-obj: #a9c3e2;
-  color-scheme: dark;
-}
-
-/* ---- light (chosen with the toggle): warm paper ---------------------- */
-:root[data-theme="light"] {
-  --bg: #f6f1e8;
-  --surface: #fffdf8;
-  --surface-2: #eee6d8;
-  --ink: #1d1914;
-  --muted: #6b6256;
-  --line: #e2d8c7;
-  --accent: #b5561a;        /* white text on it is 5:1 */
+  --bg: #ebe6de;
+  --surface: #fbf9f6;
+  --surface-2: rgba(255, 255, 255, .55);
+  --ink: #141414;
+  --muted: #5f5a54;
+  --line: rgba(255, 255, 255, .75);
+  --rule: rgba(20, 20, 20, .09);        /* thin dividers inside panels */
+  --accent: #b5561a;                    /* saffron: white text on it is 5:1 */
   --accent-2: #974512;
   --accent-ink: #ffffff;
-  --leaf: #2e7a50;
+  --leaf: #2d7a4f;
   --danger: #b3392e;
   --warn: #8f5f00;
   --sky: #2f5f96;
   --violet: #b5561a;
-  --glass: rgba(255, 253, 248, .82);
-  --glass-edge: rgba(255, 255, 255, .9);
-  --shell: rgba(60, 40, 10, .03);
-  --shadow-tint: 90, 60, 20;
+  --glass: rgba(255, 255, 255, .42);
+  --glass-strong: rgba(255, 255, 255, .72);
+  --glass-edge: rgba(255, 255, 255, .85);
+  --shell: rgba(255, 255, 255, .22);
+  --shadow-tint: 70, 50, 30;
   --glow: 0 10px 24px -12px rgba(181,86,26,.5), inset 0 1px 0 rgba(255,255,255,.25);
+  --ease: cubic-bezier(.32,.72,0,1);
+  /* the wash */
+  --wash-sage: #a9b591; --wash-beige: #d9d1c4; --wash-blush: #eab3a6; --wash-peach: #f3c49a;
   --chart-1: #2b7a4b; --chart-2: #d9480f; --chart-3: #2f6fb0;
-  --tk-kw: #b5561a; --tk-str: #2e7a50; --tk-num: #8f5f00; --tk-com: #8f8577; --tk-obj: #2f5f96;
+  --tk-kw: #b5561a; --tk-str: #2d7a4f; --tk-num: #8f5f00; --tk-com: #8a8378; --tk-obj: #2f5f96;
   color-scheme: light;
+}
+
+/* ---- dark (chosen with the toggle): the same glass on a deep, muted wash */
+:root[data-theme="dark"] {
+  --bg: #15130f;
+  --surface: #1d1a16;
+  --surface-2: rgba(255, 255, 255, .07);
+  --ink: #f2eee8;
+  --muted: #a8a197;
+  --line: rgba(255, 255, 255, .12);
+  --rule: rgba(255, 255, 255, .08);
+  --accent: #ec8a42;
+  --accent-2: #c9682a;
+  --accent-ink: #1b0f06;
+  --leaf: #6cc495;
+  --danger: #ec7564;
+  --warn: #e2b450;
+  --sky: #86acd6;
+  --violet: #ec8a42;
+  --glass: rgba(255, 255, 255, .06);
+  --glass-strong: rgba(30, 27, 23, .86);
+  --glass-edge: rgba(255, 255, 255, .10);
+  --shell: rgba(255, 255, 255, .03);
+  --shadow-tint: 0, 0, 0;
+  --glow: 0 10px 28px -12px rgba(236,138,66,.55), inset 0 1px 0 rgba(255,255,255,.22);
+  --wash-sage: #3a4430; --wash-beige: #2a2620; --wash-blush: #4a2a26; --wash-peach: #4d3523;
+  --chart-1: #319a5e; --chart-2: #e05f1a; --chart-3: #5592d4;
+  --tk-kw: #f2a061; --tk-str: #93d4ac; --tk-num: #e8c46a; --tk-com: #7a7064; --tk-obj: #a9c3e2;
+  color-scheme: dark;
 }
 
 html { background: var(--bg); color: var(--ink); scroll-behavior: smooth; }
@@ -294,3 +302,62 @@ p { text-wrap: pretty; }
    inside a single-column (phone) grid stretched the whole page sideways.
    In the base layer, so any min-w-* utility still wins. */
 @layer base { .grid > * { min-width: 0; } }
+
+
+/* =====================================================================
+   Pastel glass layer (7 October 2026). Later rules override the
+   earlier look; tokens are at the top of this file.
+   Performance: the wash is a FIXED layer of plain radial gradients, so
+   panels can be translucent without backdrop-filter (the wash behind them
+   is already soft, so a blur would look the same and cost GPU memory on
+   every scroll). Real backdrop blur is used only on the fixed nav bar,
+   the menu, dialogs and the Under the hood panel.
+   ===================================================================== */
+
+/* the wash: four out-of-focus colour pools on beige */
+.aurora { background: var(--bg); }
+.aurora i { opacity: 1; filter: none; }
+.aurora i:nth-child(1) { width: 85vmax; height: 85vmax; left: -30vmax; top: auto; bottom: -45vmax;
+  background: radial-gradient(closest-side, var(--wash-sage), transparent); animation: drift1 40s ease-in-out infinite alternate; }
+.aurora i:nth-child(2) { width: 80vmax; height: 80vmax; right: -28vmax; left: auto; top: -38vmax; bottom: auto;
+  background: radial-gradient(closest-side, var(--wash-blush), transparent); animation: drift2 46s ease-in-out infinite alternate; }
+.aurora i:nth-child(3) { width: 75vmax; height: 75vmax; right: -25vmax; left: auto; bottom: -40vmax; top: auto;
+  background: radial-gradient(closest-side, var(--wash-peach), transparent); animation: drift3 52s ease-in-out infinite alternate; }
+.aurora::before { content: ""; position: absolute; left: 20vw; top: 18vh; width: 60vw; height: 60vh; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--wash-beige), transparent); }
+:root[data-theme="light"] .aurora i, :root:not([data-theme]) .aurora i { opacity: 1; }
+.aurora::after { opacity: .05; }
+
+/* frosted glass panels: translucent white, white hairline, almost no shadow */
+.card { background: var(--glass); border: 1px solid var(--line); border-radius: 28px;
+        box-shadow: inset 0 1px 0 var(--glass-edge), 0 20px 50px -40px rgba(var(--shadow-tint), .45); }
+.bezel { padding: 8px; border-radius: 40px; background: var(--shell); border: 1px solid var(--line); }
+.bezel > .card { border-radius: 32px; }
+.card-lift:hover { border-color: var(--glass-edge); transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 var(--glass-edge), 0 26px 50px -30px rgba(var(--shadow-tint), .55); }
+.card-glow::before { display: none; }
+.chip { background: var(--surface-2); border-color: var(--line); border-radius: 9px; color: var(--muted); }
+
+/* inputs and SQL read as slightly stronger glass */
+.input { background: var(--glass-strong); border-color: var(--line); border-radius: 14px; }
+.sql { background: var(--glass-strong); border-color: var(--line); border-radius: 14px; }
+.skeleton { background: linear-gradient(90deg, var(--surface-2) 25%, var(--glass-strong) 50%, var(--surface-2) 75%);
+            background-size: 200% 100%; border-radius: 22px; }
+
+/* thin dividers inside panels (Tailwind border-line utilities) */
+.border-line { border-color: var(--rule) !important; }
+
+/* the fixed bar and overlays get the real blur */
+.glass-bar { background: color-mix(in oklab, var(--glass-strong) 80%, transparent);
+  backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%); }
+header .glass-bar { border-color: var(--line); }
+
+/* hero: keep type readable over the 3D town */
+.hero-bg { background: none; }
+.hero-veil { background:
+  linear-gradient(to bottom, color-mix(in oklab, var(--bg) 55%, transparent) 0%, transparent 30%,
+                  transparent 64%, color-mix(in oklab, var(--bg) 55%, transparent) 100%); }
+
+/* index rows: a glass wash on hover */
+.index-row::before { background: linear-gradient(90deg, var(--glass-strong), transparent 85%); }
+

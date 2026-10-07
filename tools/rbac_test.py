@@ -63,7 +63,8 @@ TESTS = [
 
   # ---------------- SHELTER ----------------
   ("shelter", "Read the live feed view", "SELECT batch_id, minutes_left FROM v_live_feed", "ALLOWED"),
-  ("shelter", "See its match ranking for a batch", f"CALL sp_rank_shelters({LIVE}, NULL)", "ALLOWED"),
+  ("shelter", "Explain its own eligibility for a batch", f"CALL sp_explain_my_eligibility(11, {LIVE})", "ALLOWED"),
+  ("shelter", "Read every shelter's ranking (capacity, fairness, scores)", f"CALL sp_rank_shelters({LIVE}, NULL)", "DENIED"),
   ("shelter", "Update its need and capacity (granted columns), rolled back",
    "START TRANSACTION; UPDATE shelter_day SET meals_needed = meals_needed + 1 WHERE shelter_site_id = 9 AND day = CURRENT_DATE; ROLLBACK", "ALLOWED"),
   ("shelter", "Read the fairness dashboard view", "SELECT * FROM v_fairness_index", "ALLOWED"),

@@ -41,10 +41,11 @@ def feed(user=Depends(SHELTER), db=Depends(role_db)):
 
 @router.get("/batches/{batch_id}/why")
 def why(batch_id: int, user=Depends(SHELTER), db=Depends(role_db)):
-    """Why this score? Runs the matching procedure and returns all rows,
-    so the UI can show this shelter's components and its rank."""
-    rows, _ = db.call("sp_rank_shelters", [batch_id, None])
-    return ok(db, {"ranking": rows, "me": user["site"]})
+    """Why can (or can't) I claim this? One row per rule and score factor,
+    for THIS shelter only (sp_explain_my_eligibility). The shelter role is
+    not granted sp_rank_shelters, so other shelters' numbers never reach it."""
+    rows, _ = db.call("sp_explain_my_eligibility", [user["uid"], batch_id])
+    return ok(db, {"checks": rows})
 
 
 @router.post("/batches/{batch_id}/claim")

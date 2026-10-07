@@ -183,6 +183,8 @@ Each `.output.md` shows the SQL and MySQL's real output side by side. They were 
 
 **Pickup batching.** `sp_create_trip` plans one trip for several claims: pickups nearest the volunteer first, then drops nearest the last pickup, with ETAs from `LAG()` and a running `SUM() OVER`. It refuses a route on which any batch would arrive after its `safe_until`. This is a simple heuristic, not an optimal route.
 
+**Why can't I claim this?** `sp_explain_my_eligibility(user, batch)` answers for the logged-in shelter only: each hard rule (still available, diet, space left today, 15 km radius, arrival before safe-until with the 30-minute buffer) passes or fails with that shelter's own numbers, then the five score factors with their weights. It calls the same functions as `sp_rank_shelters`, so the explanation cannot disagree with the real decision. The shelter role is granted this procedure and not `sp_rank_shelters`, so MySQL itself stops a shelter reading other shelters' capacity, fairness or scores (role test: DENIED, error 1370).
+
 **Total specialization.** SQL cannot force a SITE row to have a subtype row, so sites are created only through `sp_register_site`, which inserts both in one transaction (P3 in the 09 output).
 
 ## 6. Roles (Stage 5)
@@ -190,7 +192,7 @@ Each `.output.md` shows the SQL and MySQL's real output side by side. They were 
 | Role | Can | Cannot (tested) |
 |---|---|---|
 | Mess admin | Post and withdraw batches through procedures, log meals, see its batches, claims, forecasts and the impact views | Claim, write batches directly, read e-mails, password hashes, shelter capacity, volunteer data or the audit log, change policy |
-| Shelter | Live feed, ranking, claim and cancel through procedures, set its need and capacity, manage diet exclusions | Insert claims directly, touch `reserved_kg`, post batches, read meal logs, phones or the audit log, delete custody history |
+| Shelter | Live feed, "why can or can't I claim this?" for its own shelter (`sp_explain_my_eligibility`), claim and cancel through procedures, set its need and capacity, manage diet exclusions | Read the full ranking of all shelters (`sp_rank_shelters`), insert claims directly, touch `reserved_kg`, post batches, read meal logs, phones or the audit log, delete custody history |
 | Volunteer | See trips and stops, contact phones, record pickups and deliveries, go on and off duty | Read claims or capacity, change its max load, claim, read e-mails or the audit log, change policy |
 | Platform admin | Read everything, manage master data and policy weights, run every procedure | Edit custody or audit history, insert claims directly, drop or alter tables, grant privileges, create logins |
 
@@ -348,7 +350,7 @@ trip, picks up and delivers, and the custody chain verifies. They also check tha
 MySQL refuses what a role may not do (a mess admin reading the fairness view, a
 shelter cutting its capacity below what is reserved), that the race has exactly
 one winner, and that the EXPLAIN page really shows a full scan becoming an index
-range scan. Together with `tools/rbac_test.py` (66 of 66) that is 81 automated
+range scan. Together with `tools/rbac_test.py` (67 of 67) that is 81 automated
 checks.
 
 ### 8.5 What Stage 6 added to the database
@@ -421,7 +423,7 @@ rebuilds them:
 - EXPLAIN: says "same time at this table size" instead of "1.0x faster".
 - Consistent date format on the audit trail; "trip completed" in sentence case.
 - Checked against MySQL: race (one winner), matching scores (`sp_rank_shelters`),
-  impact totals. Backend tests 14 passed, 1 skipped; role tests 66 of 66.
+  impact totals. Backend tests 14 passed, 1 skipped; role tests 67 of 67.
 
 **5 to 6 October 2026, redesign**: the "night kitchen" look, the new logo, the
 editorial landing page and the full-screen Menu described in section 8.3a.

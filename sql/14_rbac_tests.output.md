@@ -1,8 +1,8 @@
 # MealBridge: role-based access tests (real output)
 
-Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-07 15:10:53. Each row is a real login as that role's demo user.
+Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-07 17:20:16. Each row is a real login as that role's demo user.
 
-**Result: 66 of 66 tests passed.**
+**Result: 67 of 67 tests passed.**
 
 - **ALLOWED**: the statement ran.
 - **DENIED**: MySQL refused it on privileges (the role has no right to that table, column or procedure).
@@ -13,7 +13,7 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-07 15:10:53. Each row
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
 | 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `4` |
-| 2 | Run the matching procedure for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1346 \| 100.0 \| 60.6 \| 85.7 \| 97.9 \| 35.5 \| 76.74 \| ELIGIBLE / 9 ` |
+| 2 | Run the matching procedure for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1349 \| 100.0 \| 60.6 \| 85.7 \| 97.9 \| 35.5 \| 76.74 \| ELIGIBLE / 9 ` |
 | 3 | Post a batch and withdraw it (own mess, via procedures) | ALLOWED | ALLOWED | PASS | `CANCELLED` |
 | 4 | Log a meal (own forecasting data), rolled back | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
 | 5 | Read staff names (granted columns) | ALLOWED | ALLOWED | PASS | `SYN Platform Admin 1` |
@@ -32,21 +32,22 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-07 15:10:53. Each row
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `419 \| 165 / 420 \| 175` |
-| 2 | See its match ranking for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1345 \| 100.0 \| 60.6 \| 85.7 \| 97.8 \| 35.5 \| 76.74 \| ELIGIBLE / 9 ` |
-| 3 | Update its need and capacity (granted columns), rolled back | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
-| 4 | Read the fairness dashboard view | ALLOWED | ALLOWED | PASS | `9 \| 0.857 \| 0.111` |
-| 5 | Set reserved_kg (trigger-kept counter) | DENIED | DENIED | PASS | `ERROR 1143: UPDATE command denied to user 'mb_shelter'@'localhost' for column 'reserved_kg' in table 'shelter_day'` |
-| 6 | INSERT a claim directly (skipping the locking procedure) | DENIED | DENIED | PASS | `ERROR 1142: INSERT command denied to user 'mb_shelter'@'localhost' for table 'claim'` |
-| 7 | Mark a batch CLAIMED directly | DENIED | DENIED | PASS | `ERROR 1142: UPDATE command denied to user 'mb_shelter'@'localhost' for table 'surplus_batch'` |
-| 8 | Claim as a user who is not shelter staff (procedure checks) | REFUSED | REFUSED | PASS | `REJECTED: only active shelter staff can claim` |
-| 9 | Cancel ANOTHER shelter's claim (procedure checks ownership) | REFUSED | REFUSED | PASS | `ERROR 1644: Not cancelled: claim is not yours or not ACTIVE` |
-| 10 | Post a batch (mess action) | DENIED | DENIED | PASS | `ERROR 1370: execute command denied to user 'mb_shelter'@'localhost' for routine 'mealbridge.sp_post_batch'` |
-| 11 | Read messes' meal logs | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_shelter'@'localhost' for table 'mess_meal_log'` |
-| 12 | Read phone numbers | DENIED | DENIED | PASS | `ERROR 1143: SELECT command denied to user 'mb_shelter'@'localhost' for column 'phone' in table 'app_user'` |
-| 13 | Read the audit log | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_shelter'@'localhost' for table 'audit_log'` |
-| 14 | Delete custody history | DENIED | DENIED | PASS | `ERROR 1142: DELETE command denied to user 'mb_shelter'@'localhost' for table 'custody_event'` |
-| 15 | Rank the live feed by its own match score (Stage 6) | ALLOWED | ALLOWED | PASS | `419 \| NULL / 420 \| NULL` |
+| 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `419 \| 169 / 420 \| 179` |
+| 2 | Explain its own eligibility for a batch | ALLOWED | ALLOWED | PASS | `RULE \| STATUS \| Still available \| 1 \| Nobody has claimed this batch yet. \| NULL \| NULL / RULE \| DIET \| Diet \| ` |
+| 3 | Read every shelter's ranking (capacity, fairness, scores) | DENIED | DENIED | PASS | `ERROR 1370: execute command denied to user 'mb_shelter'@'localhost' for routine 'mealbridge.sp_rank_shelters'` |
+| 4 | Update its need and capacity (granted columns), rolled back | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
+| 5 | Read the fairness dashboard view | ALLOWED | ALLOWED | PASS | `9 \| 0.857 \| 0.111` |
+| 6 | Set reserved_kg (trigger-kept counter) | DENIED | DENIED | PASS | `ERROR 1143: UPDATE command denied to user 'mb_shelter'@'localhost' for column 'reserved_kg' in table 'shelter_day'` |
+| 7 | INSERT a claim directly (skipping the locking procedure) | DENIED | DENIED | PASS | `ERROR 1142: INSERT command denied to user 'mb_shelter'@'localhost' for table 'claim'` |
+| 8 | Mark a batch CLAIMED directly | DENIED | DENIED | PASS | `ERROR 1142: UPDATE command denied to user 'mb_shelter'@'localhost' for table 'surplus_batch'` |
+| 9 | Claim as a user who is not shelter staff (procedure checks) | REFUSED | REFUSED | PASS | `REJECTED: only active shelter staff can claim` |
+| 10 | Cancel ANOTHER shelter's claim (procedure checks ownership) | REFUSED | REFUSED | PASS | `ERROR 1644: Not cancelled: claim is not yours or not ACTIVE` |
+| 11 | Post a batch (mess action) | DENIED | DENIED | PASS | `ERROR 1370: execute command denied to user 'mb_shelter'@'localhost' for routine 'mealbridge.sp_post_batch'` |
+| 12 | Read messes' meal logs | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_shelter'@'localhost' for table 'mess_meal_log'` |
+| 13 | Read phone numbers | DENIED | DENIED | PASS | `ERROR 1143: SELECT command denied to user 'mb_shelter'@'localhost' for column 'phone' in table 'app_user'` |
+| 14 | Read the audit log | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_shelter'@'localhost' for table 'audit_log'` |
+| 15 | Delete custody history | DENIED | DENIED | PASS | `ERROR 1142: DELETE command denied to user 'mb_shelter'@'localhost' for table 'custody_event'` |
+| 16 | Rank the live feed by its own match score (Stage 6) | ALLOWED | ALLOWED | PASS | `419 \| NULL / 420 \| NULL` |
 
 ## Volunteer  (`mb_volunteer` → role `r_volunteer`)
 
@@ -71,7 +72,7 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-07 15:10:53. Each row
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | Read the audit log | ALLOWED | ALLOWED | PASS | `2136` |
+| 1 | Read the audit log | ALLOWED | ALLOWED | PASS | `2134` |
 | 2 | Change a policy weight (audited with its login), rolled back | ALLOWED | ALLOWED | PASS | `mb_platform_admin@localhost \| {"weight": 0.300} \| {"weight": 0.350}` |
 | 3 | Run the auto-expire job | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
 | 4 | Edit custody history | DENIED | DENIED | PASS | `ERROR 1142: UPDATE command denied to user 'mb_platform_admin'@'localhost' for table 'custody_event'` |
@@ -164,7 +165,7 @@ GRANT SELECT ON `mealbridge`.`v_response_time` TO `mb_shelter`@`localhost`
 GRANT SELECT ON `mealbridge`.`v_shelter_fairness` TO `mb_shelter`@`localhost`
 GRANT EXECUTE ON PROCEDURE `mealbridge`.`sp_cancel_claim` TO `mb_shelter`@`localhost`
 GRANT EXECUTE ON PROCEDURE `mealbridge`.`sp_claim_batch` TO `mb_shelter`@`localhost`
-GRANT EXECUTE ON PROCEDURE `mealbridge`.`sp_rank_shelters` TO `mb_shelter`@`localhost`
+GRANT EXECUTE ON PROCEDURE `mealbridge`.`sp_explain_my_eligibility` TO `mb_shelter`@`localhost`
 GRANT EXECUTE ON FUNCTION `mealbridge`.`fn_match_score` TO `mb_shelter`@`localhost`
 GRANT EXECUTE ON FUNCTION `mealbridge`.`fn_meals` TO `mb_shelter`@`localhost`
 GRANT `r_shelter`@`%` TO `mb_shelter`@`localhost`

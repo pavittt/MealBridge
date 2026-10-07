@@ -100,7 +100,10 @@ GRANT SELECT ON mealbridge.v_impact_summary   TO 'r_shelter';
 GRANT SELECT ON mealbridge.v_response_time    TO 'r_shelter';
 GRANT SELECT ON mealbridge.v_shelter_fairness TO 'r_shelter';
 GRANT SELECT ON mealbridge.v_fairness_index   TO 'r_shelter';
-GRANT EXECUTE ON PROCEDURE mealbridge.sp_rank_shelters TO 'r_shelter';
+-- Not sp_rank_shelters: it lists EVERY shelter's capacity, fairness and
+-- score. A shelter gets sp_explain_my_eligibility instead, which answers
+-- "why can't I claim this?" for its own shelter only.
+GRANT EXECUTE ON PROCEDURE mealbridge.sp_explain_my_eligibility TO 'r_shelter';
 GRANT EXECUTE ON PROCEDURE mealbridge.sp_claim_batch   TO 'r_shelter';
 GRANT EXECUTE ON PROCEDURE mealbridge.sp_cancel_claim  TO 'r_shelter';
 GRANT EXECUTE ON FUNCTION  mealbridge.fn_meals         TO 'r_shelter';

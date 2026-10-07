@@ -20,6 +20,8 @@
 --   sp_rank_shelters    THE MATCHING PROCEDURE: ranks shelters for a
 --                       batch on need, capacity, distance, perishability
 --                       and fairness, and shows why others are excluded
+--   sp_explain_my_eligibility  "why can't I claim this?" for the calling
+--                       shelter only: each rule and factor with its numbers
 --   sp_claim_batch      shelter claims a batch: TRANSACTION + FOR UPDATE
 --   sp_cancel_claim     shelter backs out before pickup
 --   sp_create_trip      volunteer pickup batching (multi-stop trip)
@@ -44,6 +46,7 @@ DROP PROCEDURE IF EXISTS sp_record_delivery;
 DROP PROCEDURE IF EXISTS sp_set_availability;
 DROP PROCEDURE IF EXISTS sp_expire_batches;
 DROP PROCEDURE IF EXISTS sp_generate_forecast;
+DROP PROCEDURE IF EXISTS sp_explain_my_eligibility;
 
 DELIMITER $$
 
@@ -689,6 +692,179 @@ BEGIN
              AND sf.predicted_kg >= c_alert_kg) f
     JOIN app_user u ON u.role = 'SHELTER' AND u.is_active
    WHERE f.total_kg IS NOT NULL AND p_notify;
+END$$
+
+-- ---------------------------------------------------------------------
+-- sp_explain_my_eligibility : "WHY CAN'T I CLAIM THIS?" for ONE shelter.
+--   Answers, for the logged-in shelter user and one batch, which matching
+--   rules pass or fail and how each score factor is made up, with the
+--   real numbers. It shows ONLY the caller's own shelter: no other
+--   shelter's capacity, score or fairness appears anywhere in the output.
+--
+--   Why a separate procedure: sp_rank_shelters returns EVERY shelter, which
+--   a mess admin needs ("who gets this?") but a shelter must not see. The
+--   shelter role is therefore granted this procedure and NOT
+--   sp_rank_shelters (08_roles_grants.sql), so MySQL itself blocks a
+--   shelter from reading the full ranking.
+--
+--   Row-level ownership: the shelter is resolved from p_user_id inside the
+--   procedure (SQL SECURITY DEFINER), exactly like sp_claim_batch. MySQL
+--   has no row-level security, so the API passes the logged-in user's id.
+--
+--   It reuses the same functions as the ranking, so the explanation can
+--   never disagree with the real decision:
+--     hard rules : status, fn_is_diet_compatible (diet), fn_capacity_score
+--                  (space left), fn_distance_score (15 km radius),
+--                  fn_perishability_score (arrival + 30 min buffer)
+--     factors    : fn_need_score, fn_fairness_score, fn_distance_score,
+--                  fn_perishability_score, fn_capacity_score, weighted by
+--                  scoring_weight; fn_match_score gives the final number.
+--
+--   Output: one row per check, in reading order.
+--     kind        RULE (must pass), FACTOR (part of the score), RESULT
+--     code        STATUS, DIET, CAPACITY, RADIUS, TIME, NEED, ...
+--     label       short name
+--     passed      1 / 0 for rules and the result, NULL for factors
+--     explanation a plain sentence with this shelter's own numbers
+--     score       0-100 for factors and the result
+--     weight      the factor's weight from scoring_weight
+-- ---------------------------------------------------------------------
+CREATE PROCEDURE sp_explain_my_eligibility(IN p_user_id INT UNSIGNED, IN p_batch_id INT UNSIGNED)
+SQL SECURITY DEFINER
+BEGIN
+  DECLARE c_radius_km  DECIMAL(5,2) DEFAULT 15.00;   -- same ASSUMPTION as fn_distance_score
+  DECLARE c_buffer_min DECIMAL(5,1) DEFAULT 30.0;    -- same ASSUMPTION as fn_perishability_score
+  DECLARE v_now     DATETIME DEFAULT NOW();
+  DECLARE v_shelter INT UNSIGNED;
+  DECLARE v_status  VARCHAR(12);
+  DECLARE v_desc    VARCHAR(200);
+  DECLARE v_qty     DECIMAL(7,2);
+  DECLARE v_safe    DATETIME;
+  DECLARE v_km      DECIMAL(8,3);
+  DECLARE v_travel  DECIMAL(8,1);
+  DECLARE v_left    DECIMAL(10,1);
+  DECLARE v_cap, v_res, v_free DECIMAL(8,2);
+  DECLARE v_needed  INT;
+  DECLARE v_bad     VARCHAR(255);
+  DECLARE v_need, v_fair, v_dist, v_perish, v_capsc, v_score DECIMAL(6,2);
+  DECLARE v_mine, v_total, v_benef, v_benef_total DECIMAL(12,2);
+  DECLARE w_need, w_fair, w_dist, w_perish, w_cap DECIMAL(5,3);
+
+  -- 1. whose shelter? (the caller's own, never a parameter)
+  SELECT site_id INTO v_shelter FROM app_user
+   WHERE user_id = p_user_id AND role = 'SHELTER' AND is_active;
+  IF v_shelter IS NULL THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Only active shelter staff can ask about their own eligibility';
+  END IF;
+
+  -- 2. the batch, and the distance from its mess to THIS shelter
+  SELECT b.status, b.description, b.quantity_kg, b.safe_until, fn_distance_km(ms.location, me.location)
+    INTO v_status, v_desc, v_qty, v_safe, v_km
+    FROM surplus_batch b
+    JOIN site ms ON ms.site_id = b.mess_site_id
+    JOIN site me ON me.site_id = v_shelter
+   WHERE b.batch_id = p_batch_id;
+  IF v_status IS NULL THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Unknown batch';
+  END IF;
+  SET v_travel = fn_travel_minutes(v_km);
+  SET v_left   = TIMESTAMPDIFF(SECOND, v_now, v_safe) / 60;
+
+  -- 3. this shelter's own capacity and need for today
+  SELECT COALESCE(sd.capacity_kg, s.default_capacity_kg), COALESCE(sd.reserved_kg, 0),
+         COALESCE(sd.meals_needed, s.beneficiary_count)
+    INTO v_cap, v_res, v_needed
+    FROM shelter s
+    LEFT JOIN shelter_day sd ON sd.shelter_site_id = s.site_id AND sd.day = DATE(v_now)
+   WHERE s.site_id = v_shelter;
+  SET v_free = v_cap - v_res;
+
+  -- 4. diet: which of the batch's tags are on this shelter's exclusion list
+  SELECT GROUP_CONCAT(LOWER(REPLACE(bdt.tag_code, '_', ' ')) ORDER BY bdt.tag_code SEPARATOR ', ')
+    INTO v_bad
+    FROM batch_diet_tag bdt
+    JOIN shelter_diet_exclusion sde ON sde.tag_code = bdt.tag_code
+   WHERE bdt.batch_id = p_batch_id AND sde.shelter_site_id = v_shelter;
+
+  -- 5. the same functions the ranking uses
+  SET v_need   = fn_need_score(v_shelter, DATE(v_now));
+  SET v_fair   = fn_fairness_score(v_shelter, v_now);
+  SET v_dist   = fn_distance_score(v_km);
+  SET v_perish = fn_perishability_score(v_travel, v_left);
+  SET v_capsc  = fn_capacity_score(v_shelter, DATE(v_now), v_qty);
+  SET v_score  = fn_match_score(p_batch_id, v_shelter, v_now);
+
+  -- fairness inputs, as totals and shares only (nothing per other shelter)
+  SELECT COALESCE(SUM(IF(c.shelter_site_id = v_shelter, b.quantity_kg, 0)), 0), COALESCE(SUM(b.quantity_kg), 0)
+    INTO v_mine, v_total
+    FROM claim c JOIN surplus_batch b ON b.batch_id = c.batch_id
+   WHERE c.status IN ('ACTIVE','FULFILLED')
+     AND c.claimed_at >= v_now - INTERVAL 7 DAY AND c.claimed_at < v_now;
+  SELECT SUM(IF(s.site_id = v_shelter, s.beneficiary_count, 0)), SUM(s.beneficiary_count)
+    INTO v_benef, v_benef_total
+    FROM shelter s JOIN site t ON t.site_id = s.site_id WHERE t.is_active;
+
+  SELECT MAX(IF(weight_key = 'NEED', weight_value, NULL)),     MAX(IF(weight_key = 'FAIRNESS', weight_value, NULL)),
+         MAX(IF(weight_key = 'DISTANCE', weight_value, NULL)), MAX(IF(weight_key = 'PERISHABILITY', weight_value, NULL)),
+         MAX(IF(weight_key = 'CAPACITY', weight_value, NULL))
+    INTO w_need, w_fair, w_dist, w_perish, w_cap
+    FROM scoring_weight;
+
+  -- 6. one row per check
+  SELECT 'RULE' AS kind, 'STATUS' AS code, 'Still available' AS label,
+         (v_status = 'AVAILABLE') AS passed,
+         IF(v_status = 'AVAILABLE', 'Nobody has claimed this batch yet.',
+            CONCAT('This batch is already ', LOWER(v_status), ', so it can no longer be claimed.')) AS explanation,
+         NULL AS score, NULL AS weight
+  UNION ALL
+  SELECT 'RULE', 'DIET', 'Diet', (v_bad IS NULL),
+         IF(v_bad IS NULL, 'Nothing in this batch is on your diet exclusion list.',
+            CONCAT('This batch is tagged ', v_bad, ', which your shelter has excluded.')), NULL, NULL
+  UNION ALL
+  SELECT 'RULE', 'CAPACITY', 'Space left today', (v_free >= v_qty),
+         CONCAT('This batch is ', FORMAT(v_qty, 1), ' kg; you have ', FORMAT(GREATEST(v_free, 0), 1),
+                ' kg of space left today (', FORMAT(v_cap, 1), ' kg capacity, ', FORMAT(v_res, 1),
+                ' kg already reserved).',
+                IF(v_free >= v_qty, '', ' The whole batch has to fit, so it cannot be claimed.')), NULL, NULL
+  UNION ALL
+  SELECT 'RULE', 'RADIUS', 'Within 15 km', (v_km <= c_radius_km),
+         CONCAT('The mess is ', FORMAT(v_km, 1), ' km from you; the service radius is ',
+                FORMAT(c_radius_km, 0), ' km.'), NULL, NULL
+  UNION ALL
+  SELECT 'RULE', 'TIME', 'Arrives in time', (v_perish IS NOT NULL),
+         CONCAT('A trip to you takes about ', ROUND(v_travel), ' min; the food is safe for ',
+                GREATEST(ROUND(v_left), 0), ' more min, and a ', ROUND(c_buffer_min),
+                '-min safety margin is needed, so the trip must take under ',
+                GREATEST(ROUND(v_left - c_buffer_min), 0), ' min.'), NULL, NULL
+  UNION ALL
+  SELECT 'FACTOR', 'NEED', 'Need', NULL,
+         CONCAT('You need ', v_needed, ' meals today; ', ROUND(v_need), '% of them are not covered yet. ',
+                'The more you still lack, the higher this is.'), v_need, w_need
+  UNION ALL
+  SELECT 'FACTOR', 'FAIRNESS', 'Fairness', NULL,
+         CONCAT('In the last 7 days you received ', FORMAT(v_mine, 1), ' kg, ',
+                IF(v_total = 0, '0', FORMAT(100 * v_mine / v_total, 1)), '% of all food claimed; you serve ',
+                IF(v_benef_total = 0, '0', FORMAT(100 * v_benef / v_benef_total, 1)),
+                '% of all beneficiaries. Below your share scores higher.'), v_fair, w_fair
+  UNION ALL
+  SELECT 'FACTOR', 'DISTANCE', 'Distance', NULL,
+         CONCAT(FORMAT(v_km, 1), ' km away. Closer is higher; 0 at ', FORMAT(c_radius_km, 0), ' km.'), v_dist, w_dist
+  UNION ALL
+  SELECT 'FACTOR', 'PERISHABILITY', 'Time margin', NULL,
+         CONCAT('The trip would use ', IF(v_left > 0, ROUND(100 * v_travel / v_left), 100),
+                '% of the food''s remaining safe time. Less is higher.'), v_perish, w_perish
+  UNION ALL
+  SELECT 'FACTOR', 'CAPACITY', 'Capacity fit', NULL,
+         CONCAT('The batch would fill ', IF(v_free > 0, ROUND(100 * v_qty / v_free), 100),
+                '% of your free space. A fuller fit wastes less space and is higher.'), v_capsc, w_cap
+  UNION ALL
+  SELECT 'RESULT', 'MATCH', 'Your match score', (v_status = 'AVAILABLE' AND v_score IS NOT NULL),
+         IF(v_score IS NULL,
+            'At least one rule above fails, so you get no score for this batch and cannot claim it.',
+            IF(v_status = 'AVAILABLE',
+               'Every rule passes: the score is the weighted average of the five factors, and you can claim it.',
+               'The rules pass for you, but the batch is no longer available.')),
+         v_score, NULL;
 END$$
 
 DELIMITER ;

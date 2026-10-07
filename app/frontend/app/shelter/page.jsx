@@ -2,6 +2,8 @@
 /* =====================================================================
    Shelter dashboard.
    - Live feed: view v_live_feed ranked by fn_match_score(batch, my shelter).
+   - "Why?" explains this shelter's own eligibility (sp_explain_my_eligibility):
+     each rule and score factor with its numbers, never other shelters'.
    - Claim: CALL sp_claim_batch -> transaction with SELECT ... FOR UPDATE.
      If another shelter got there first, MySQL's answer is shown as is.
    - Today's capacity: a column-level UPDATE on shelter_day; the CHECK
@@ -11,7 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import Modal from "@/components/Modal";
 import ListItem from "@/components/motion/ListItem";
-import RankingTable from "@/components/RankingTable";
+import EligibilityPanel from "@/components/EligibilityPanel";
 import { CountdownRing, ErrorBox, PageHeader, Skeleton, StatusChip, SynthNote, useNow, useRequireRole } from "@/components/ui";
 import { api, fmt, serverOffset, toast } from "@/lib/api";
 
@@ -62,7 +64,7 @@ function FeedCard({ b, rank, now, offset, onClaim, onWhy, busy }) {
     <article className={`card p-4 flex gap-4 items-center ${eligible ? "" : "opacity-60"}`}>
       <div className="text-center w-14 shrink-0">
         <div className="text-2xl font-semibold tabular-nums" style={{ color: eligible ? "var(--accent)" : "var(--muted)" }}>{eligible ? Math.round(b.match_score) : "–"}</div>
-        {/* the feed position, not the shelter's place among all shelters (that is in "Why?") */}
+        {/* the place of this batch in your own feed, best match first */}
         <div className="text-[10px] text-muted leading-tight mt-0.5">{eligible ? `your score · #${rank} here` : "not eligible"}</div>
       </div>
       <div className="flex-1 min-w-0">
@@ -120,7 +122,7 @@ export default function ShelterPage() {
   }
   async function openWhy(b) {
     setWhy({ b, rows: null });
-    try { const r = await api(`/api/shelter/batches/${b.batch_id}/why`, { label: "Explain match score" }); setWhy({ b, rows: r.ranking, me: r.me }); }
+    try { const r = await api(`/api/shelter/batches/${b.batch_id}/why`, { label: "Explain match score" }); setWhy({ b, rows: r.checks }); }
     catch (e) { setWhy(null); toast(e.message, "error"); }
   }
 
@@ -169,9 +171,9 @@ export default function ShelterPage() {
           </section>
         </aside>
       </div>
-      <Modal open={!!why} wide title={why ? `Why this score? Batch #${why.b.batch_id}` : ""} onClose={() => setWhy(null)}>
-        <p className="text-xs text-muted mb-3 font-mono">CALL sp_rank_shelters({why?.b.batch_id}, NULL) · your row is highlighted</p>
-        {why?.rows ? <RankingTable rows={why.rows} me={why.me} /> : <Skeleton className="h-64" />}
+      <Modal open={!!why} title={why ? `Batch #${why.b.batch_id}: can you claim it?` : ""} onClose={() => setWhy(null)}>
+        <p className="text-xs text-muted mb-4 font-mono">CALL sp_explain_my_eligibility(you, {why?.b.batch_id})</p>
+        {why?.rows ? <EligibilityPanel checks={why.rows} /> : <Skeleton className="h-64" />}
       </Modal>
       <SynthNote />
     </div>

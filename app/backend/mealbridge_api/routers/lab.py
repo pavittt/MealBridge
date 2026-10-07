@@ -46,7 +46,9 @@ def race(user=Depends(current_user)):
 
     # -- 2. the two best ELIGIBLE shelters for it, and one staff user of each
     with DbSession("SHELTER") as sh:
-        ranking, _ = sh.call("sp_rank_shelters", [batch_id, None])
+        # the full ranking is a mess-admin view (shelters cannot read it)
+        with DbSession("MESS_ADMIN") as ranker:
+            ranking, _ = ranker.call("sp_rank_shelters", [batch_id, None])
         eligible = [r for r in ranking if r["verdict"] == "ELIGIBLE"][:2]
         if len(eligible) < 2:
             raise HTTPException(409, "Fewer than two shelters are eligible right now (capacity used up). "

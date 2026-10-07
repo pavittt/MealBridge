@@ -241,16 +241,21 @@ function Sparks({ c, glow }) {
 
 function Rig({ still }) {
   // Slow orbit plus a little parallax that follows the pointer
-  const { camera, pointer } = useThree();
+  const { camera, pointer, size, scene } = useThree();
   const target = useMemo(() => new THREE.Vector3(), []);
   useFrame(({ clock }) => {
-    const r = 12.6;   // far enough that the whole round "table" fits in frame
+    // far enough that the whole round "table" fits in frame. The field of view
+    // is vertical, so in a narrower box (the hero's column, a phone) the camera
+    // steps back along the same direction, and the fog moves back with it.
+    const k = Math.max(1, 1.6 / (size.width / Math.max(1, size.height)));
+    const r = 12.6 * k, y = 8.8 * k;
+    if (scene.fog) { scene.fog.near = 14 * k; scene.fog.far = 26 * k; }
     if (still) {
       // reduced motion: jump straight to the pose (only one frame is drawn)
-      camera.position.set(Math.sin(0.6) * r, 8.8, Math.cos(0.6) * r);
+      camera.position.set(Math.sin(0.6) * r, y, Math.cos(0.6) * r);
     } else {
       const t = clock.elapsedTime * 0.06;
-      target.set(Math.sin(t + 0.6) * r + pointer.x * 0.8, 8.8 + pointer.y * 0.5, Math.cos(t + 0.6) * r);
+      target.set(Math.sin(t + 0.6) * r + pointer.x * 0.8, y + pointer.y * 0.5, Math.cos(t + 0.6) * r);
       camera.position.lerp(target, 0.05);
     }
     camera.lookAt(0, 0.2, 0);

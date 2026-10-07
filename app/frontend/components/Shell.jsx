@@ -65,7 +65,7 @@ function ThemeToggle() {
             aria-label={`Theme: ${theme}. Switch to ${next}`} title={`Switch to ${next} theme`}>
       <span className="inline-block w-2.5 h-2.5 rounded-full border border-current"
             style={{ background: theme === "dark" ? "transparent" : "currentColor" }} aria-hidden="true" />
-      <span className="hidden sm:inline">{theme === "dark" ? "Paper" : "Night"}</span>
+      <span className="hidden sm:inline lg:hidden xl:inline">{theme === "dark" ? "Paper" : "Night"}</span>
     </button>
   );
 }
@@ -127,7 +127,7 @@ export default function Shell({ children }) {
           <nav aria-label="Main" className="hidden lg:flex items-center gap-0.5 ml-1">
             {links.map(([href, label]) => (
               <Link key={href} href={href} aria-current={isActive(href) ? "page" : undefined}
-                    className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-300 ${
+                    className={`nav-link px-2.5 xl:px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-300 ${
                       isActive(href) ? "bg-surface-2 text-ink" : "text-muted hover:text-ink"}`}>
                 {label}
               </Link>

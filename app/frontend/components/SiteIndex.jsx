@@ -17,7 +17,7 @@ export function MenuButton({ open, onClick }) {
   return (
     <button className="btn btn-ghost !pl-4 !pr-1.5 !py-1.5 !text-sm" onClick={onClick} aria-expanded={open}
             aria-controls="site-index" aria-label={open ? "Close the site index" : "Open the site index: every page"}>
-      <span className="hidden sm:inline">{open ? "Close" : "Menu"}</span>
+      <span className="hidden sm:inline lg:hidden xl:inline">{open ? "Close" : "Menu"}</span>
       {/* two lines that fold into an X */}
       <span className="relative w-8 h-8 rounded-full bg-surface-2 inline-flex items-center justify-center" aria-hidden="true">
         <span className="absolute h-[1.5px] w-3.5 bg-current transition-transform duration-500"

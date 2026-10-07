@@ -375,3 +375,10 @@ header .glass-bar { border-color: var(--line); }
 .btn-ghost:hover:not(:disabled) { background: var(--surface); border-color: var(--glass-edge); }
 .btn-primary .btn-orb { background: color-mix(in oklab, var(--btn-ink) 18%, transparent); }
 .btn-ghost .btn-orb { background: var(--btn); color: var(--btn-ink); }
+
+/* the big rounded glass slab that groups a whole section (reference look) */
+.slab { position: relative; background: var(--glass); border: 1px solid var(--line); border-radius: 44px;
+        box-shadow: inset 0 1px 0 var(--glass-edge), 0 40px 90px -70px rgba(var(--shadow-tint), .55); }
+@media (max-width: 639px) { .slab { border-radius: 30px; } }
+/* the wordmark under the hero slab: big, but sized to the column */
+.wordmark { font-size: clamp(3.6rem, 15vw, 15rem); }

@@ -52,11 +52,11 @@ const GROUPS = (role) => [
   },
   {
     title: "Explore",
-    note: "No login needed",
+    note: "The overview",
     items: [
-      ["/", "Home", "The story of one batch, from kitchen to shelter."],
+      ["/", "Home", "The story of one batch, from kitchen to shelter. No login needed."],
       ["/impact", "Impact", "Meals, kilograms and carbon, from the impact views."],
-    ].map(([h, t, d]) => [h, t, d, ""]),
+    ].map(([h, t, d]) => [h, t, d, h === "/impact" && !role ? "log in" : ""]),
   },
 ];
 

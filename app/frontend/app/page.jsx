@@ -42,7 +42,7 @@ const INDEX = [
   ["/lab/explain", "EXPLAIN", "The same query with and without its index: access type, rows examined, measured time.", "Database"],
   ["/lab/custody", "Audit trail", "A batch's chain of custody, each event hashed with the one before it, verified by a stored function.", "Database"],
   ["/lab/schema", "Schema", "Tables, keys and indexes read live from information_schema, with every procedure and trigger's source.", "Database"],
-  ["/impact", "Impact", "Meals, kilograms and carbon over time, from the impact views. No login needed.", "Open"],
+  ["/impact", "Impact", "Meals, kilograms and carbon over time, from the impact views. Any login can open it.", "Log in"],
 ];
 
 function Ticker({ s }) {

@@ -53,6 +53,7 @@ export default function Hero3D({ bare = false, className = "" }) {
   const colors = useThemeColors(["bg", "surface", "surface-2", "line", "ink", "accent", "accent-2", "leaf", "sky"]);
   const [gl, setGl] = useState(null);          // null = not checked yet
   const [onScreen, setOnScreen] = useState(true);
+  const [lost, setLost] = useState(false);       // GPU context lost: show the flat drawing
 
   useEffect(() => { setGl(hasWebGL()); }, []);
   useEffect(() => {
@@ -66,10 +67,10 @@ export default function Hero3D({ bare = false, className = "" }) {
     <figure className={bare ? `absolute inset-0 m-0 ${className}` : "relative"}>
       <div ref={box} className={bare ? "absolute inset-0" : "relative aspect-[5/4] w-full"} role="img"
            aria-label="Illustration: saffron hostel messes send parcels of food along arcs to green shelters">
-        {gl === false ? (
+        {gl === false || lost ? (
           <div className="absolute inset-0 flex items-center"><RouteArt /></div>
         ) : gl && colors.accent ? (
-          <HeroScene colors={colors} running={onScreen} still={reduced} />
+          <HeroScene colors={colors} running={onScreen} still={reduced} onLost={() => setLost(true)} />
         ) : (
           <div className="absolute inset-0 hero-glow" aria-hidden="true" />
         )}

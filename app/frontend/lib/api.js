@@ -65,7 +65,8 @@ export async function api(path, { method = "GET", body, label } = {}) {
   const entry = { at: new Date(), method, path, label: label || `${method} ${path}`, status: res.status };
   if (!res.ok) {
     const d = json?.detail;
-    const msg = typeof d === "string" ? d : d?.message || `HTTP ${res.status}`;
+    const msg = typeof d === "string" ? d : d?.message
+      || (!json && res.status >= 500 ? "Cannot reach the API. Is the backend running on port 8000?" : `HTTP ${res.status}`);
     if (d?.hood) hoodStore.set((h) => [{ ...entry, hood: d.hood, error: msg, mysqlError: d.mysql_error }, ...h].slice(0, 25));
     if (res.status === 401 && s) setSession(null);
     throw new ApiError(res.status, msg, d);

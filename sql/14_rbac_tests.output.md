@@ -1,6 +1,6 @@
 # MealBridge: role-based access tests (real output)
 
-Run by `tools/rbac_test.py` against MySQL 8.0.46-0ubuntu0.24.04.4 at 2026-10-07 09:26:27. Each row is a real login as that role's demo user.
+Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-07 15:10:53. Each row is a real login as that role's demo user.
 
 **Result: 66 of 66 tests passed.**
 
@@ -13,7 +13,7 @@ Run by `tools/rbac_test.py` against MySQL 8.0.46-0ubuntu0.24.04.4 at 2026-10-07 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
 | 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `4` |
-| 2 | Run the matching procedure for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1349 \| 100.0 \| 60.6 \| 85.7 \| 97.9 \| 33.2 \| 76.16 \| ELIGIBLE / 10` |
+| 2 | Run the matching procedure for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1346 \| 100.0 \| 60.6 \| 85.7 \| 97.9 \| 35.5 \| 76.74 \| ELIGIBLE / 9 ` |
 | 3 | Post a batch and withdraw it (own mess, via procedures) | ALLOWED | ALLOWED | PASS | `CANCELLED` |
 | 4 | Log a meal (own forecasting data), rolled back | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
 | 5 | Read staff names (granted columns) | ALLOWED | ALLOWED | PASS | `SYN Platform Admin 1` |
@@ -32,10 +32,10 @@ Run by `tools/rbac_test.py` against MySQL 8.0.46-0ubuntu0.24.04.4 at 2026-10-07 
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `419 \| 169 / 420 \| 179` |
-| 2 | See its match ranking for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1349 \| 100.0 \| 60.6 \| 85.7 \| 97.9 \| 33.2 \| 76.16 \| ELIGIBLE / 10` |
+| 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `419 \| 165 / 420 \| 175` |
+| 2 | See its match ranking for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1345 \| 100.0 \| 60.6 \| 85.7 \| 97.8 \| 35.5 \| 76.74 \| ELIGIBLE / 9 ` |
 | 3 | Update its need and capacity (granted columns), rolled back | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
-| 4 | Read the fairness dashboard view | ALLOWED | ALLOWED | PASS | `9 \| 0.85 \| 0.111` |
+| 4 | Read the fairness dashboard view | ALLOWED | ALLOWED | PASS | `9 \| 0.857 \| 0.111` |
 | 5 | Set reserved_kg (trigger-kept counter) | DENIED | DENIED | PASS | `ERROR 1143: UPDATE command denied to user 'mb_shelter'@'localhost' for column 'reserved_kg' in table 'shelter_day'` |
 | 6 | INSERT a claim directly (skipping the locking procedure) | DENIED | DENIED | PASS | `ERROR 1142: INSERT command denied to user 'mb_shelter'@'localhost' for table 'claim'` |
 | 7 | Mark a batch CLAIMED directly | DENIED | DENIED | PASS | `ERROR 1142: UPDATE command denied to user 'mb_shelter'@'localhost' for table 'surplus_batch'` |
@@ -71,7 +71,7 @@ Run by `tools/rbac_test.py` against MySQL 8.0.46-0ubuntu0.24.04.4 at 2026-10-07 
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | Read the audit log | ALLOWED | ALLOWED | PASS | `2142` |
+| 1 | Read the audit log | ALLOWED | ALLOWED | PASS | `2136` |
 | 2 | Change a policy weight (audited with its login), rolled back | ALLOWED | ALLOWED | PASS | `mb_platform_admin@localhost \| {"weight": 0.300} \| {"weight": 0.350}` |
 | 3 | Run the auto-expire job | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
 | 4 | Edit custody history | DENIED | DENIED | PASS | `ERROR 1142: UPDATE command denied to user 'mb_platform_admin'@'localhost' for table 'custody_event'` |

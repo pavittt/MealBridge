@@ -279,7 +279,7 @@ function Town({ c, still }) {
   );
 }
 
-export default function HeroScene({ colors, running, still }) {
+export default function HeroScene({ colors, running, still, onLost }) {
   // Dark theme: glowing (additive) light. Light theme: normal blending,
   // because adding light to a pale background only washes it out.
   const dark = new THREE.Color(colors.bg || colors.surface).getHSL({}).l < 0.5;
@@ -292,11 +292,16 @@ export default function HeroScene({ colors, running, still }) {
   };
   return (
     <Canvas
-      dpr={[1, 1.75]}
+      dpr={[1, 1.5]}
       camera={{ position: [7.6, 8.8, 11], fov: 36 }}
       // "demand" draws once (reduced motion); "never" pauses when off screen
       frameloop={!running ? "never" : still ? "demand" : "always"}
-      gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+      gl={{ antialias: true, alpha: true, powerPreference: "default" }}
+      onCreated={({ gl }) => {
+        // If the GPU context is lost, hand over to the flat drawing (Hero3D) instead of
+        // letting three.js keep compiling shaders on a dead context.
+        gl.domElement.addEventListener("webglcontextlost", (e) => { e.preventDefault(); onLost?.(); }, { once: true });
+      }}
       aria-hidden="true"
     >
       <fog attach="fog" args={[colors.bg, 14, 26]} />

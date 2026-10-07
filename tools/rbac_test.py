@@ -29,8 +29,8 @@ USERS = {
 PRIV_ERRORS = {"1142", "1143", "1370", "1044", "1227", "1410"}
 
 def root(sql):
-    return subprocess.run(["mysql", "-uroot", "mealbridge", "-N", "-B", "-e", sql],
-                          text=True, capture_output=True).stdout.strip()
+    return subprocess.run(["mysql", "-uroot", "--default-character-set=utf8mb4", "mealbridge", "-N", "-B", "-e", sql],
+                          text=True, encoding="utf-8", capture_output=True).stdout.strip()
 
 LIVE = root("SELECT batch_id FROM surplus_batch WHERE description='SYN Chicken curry (live demo)'")
 LIVE_TRIP = root("SELECT MAX(trip_id) FROM pickup_trip WHERE status='IN_PROGRESS'")
@@ -137,8 +137,8 @@ TESTS = [
 def run(role, sql):
     user, pw = USERS[role]
     env = dict(os.environ, MYSQL_PWD=pw)
-    r = subprocess.run(["mysql", f"-u{user}", "mealbridge", "-B", "-e", sql],
-                       text=True, capture_output=True, env=env)
+    r = subprocess.run(["mysql", f"-u{user}", "--default-character-set=utf8mb4", "mealbridge", "-B", "-e", sql],
+                       text=True, encoding="utf-8", capture_output=True, env=env)
     out = (r.stdout + r.stderr).strip()
     m = re.search(r"ERROR (\d+) \((\w+)\)(?: at line \d+)?: (.*)", r.stderr)
     if m:
@@ -164,9 +164,9 @@ for role, what, sql, expect in TESTS:
 
 grants = {}
 for role, (user, pw) in USERS.items():
-    grants[role] = subprocess.run(["mysql", "-uroot", "-N", "-B", "-e",
+    grants[role] = subprocess.run(["mysql", "-uroot", "--default-character-set=utf8mb4", "-N", "-B", "-e",
                                    f"SHOW GRANTS FOR '{user}'@'localhost' USING 'r_{role}'"],
-                                  text=True, capture_output=True).stdout.strip()
+                                  text=True, encoding="utf-8", capture_output=True).stdout.strip()
 
 ver = root("SELECT CONCAT(VERSION(), ' at ', NOW())")
 md = ["# MealBridge: role-based access tests (real output)", "",
@@ -190,7 +190,9 @@ for role in USERS:
 md += ["## Appendix: effective grants per login", ""]
 for role in USERS:
     md += [f"### {USERS[role][0]}", "", "```sql", grants[role], "```", ""]
-(ROOT / "sql" / "14_rbac_tests.output.md").write_text("\n".join(md) + "\n")
+# encoding="utf-8": the report contains non-ASCII characters (the arrow in the
+# headings). Without it Windows uses its ANSI code page (cp1252) and crashes here.
+(ROOT / "sql" / "14_rbac_tests.output.md").write_text("\n".join(md) + "\n", encoding="utf-8")
 print(f"{len(rows) - fails}/{len(rows)} passed")
 for r in rows:
     print(f"{r[4]}  {r[0]:<15} {r[2]:<8} {r[3]:<8} {r[1]}  :: {r[5][:90]}")

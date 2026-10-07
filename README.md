@@ -13,8 +13,17 @@ MealBridge matches surplus hostel and mess food with nearby shelters. This folde
 You need MySQL 8.0.16 or newer (tested on **MySQL 8.0.46** and **MySQL 8.4.9** on Windows 11) and an admin login.
 
 ```bash
-mysql -u root -p < sql/setup.sql
+mysql -u root -p --default-character-set=utf8mb4 < sql/setup.sql
 ```
+
+In PowerShell, which has no `<`, run it as
+`mysql -u root -p --default-character-set=utf8mb4 -e "source sql/setup.sql"`.
+
+`setup.sql` also sets the character set itself (`SET NAMES utf8mb4` at the top
+of `01_schema.sql`), so it loads cleanly even without the flag. That matters on
+Windows, where the `mysql` client connects as `cp850` by default; procedures
+and triggers created over a `cp850` connection fail later with
+"Illegal mix of collations". Use the flag for your own interactive sessions too.
 
 That one file drops and recreates the `mealbridge` database, loads about 30 days of synthetic history plus a live "today", and creates the four role logins. It takes a few seconds.
 
@@ -37,7 +46,7 @@ bash tools/run_all.sh
 Three commands, once:
 
 ```bash
-mysql -u root -p < sql/setup.sql                         # 1. the database
+mysql -u root -p --default-character-set=utf8mb4 < sql/setup.sql   # 1. the database
 pip install -r app/backend/requirements.txt              # 2. the API's packages
 cd app/frontend && npm install && cd ../..               # 3. the web app's packages
 ```
@@ -132,7 +141,7 @@ each with the file that implements it and the test that proves it.
 | `10_dml_examples.sql` | 12 INSERT, UPDATE and DELETE examples, each with its reason | `10_...output.md` |
 | `11_queries.sql` | 20 queries (joins, nested, aggregate, window), each with a one-line purpose | `11_...output.md` |
 | `12_explain_indexes.sql` | EXPLAIN and EXPLAIN ANALYZE before and after each index, on 200,000 rows | `12_...output.md` |
-| `13_race_demo.sh` | Two sessions racing for one batch | `13_race_demo.output.txt` |
+| `13_race_demo.sh` | Two sessions racing for one batch (it picks the two best eligible shelters at run time, so it works on any day's data) | `13_race_demo.output.txt` |
 | `tools/rbac_test.py` | Logs in as each role and tries 51 allowed and forbidden actions | `14_rbac_tests.output.md` |
 
 Each `.output.md` shows the SQL and MySQL's real output side by side. They were produced by `tools/run_report.py`, which runs the file in one MySQL session and records exactly what came back.

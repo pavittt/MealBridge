@@ -1,6 +1,6 @@
 # MealBridge: role-based access tests (real output)
 
-Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-06 18:17:41. Each row is a real login as that role's demo user.
+Run by `tools/rbac_test.py` against MySQL 8.0.46-0ubuntu0.24.04.4 at 2026-10-07 09:26:27. Each row is a real login as that role's demo user.
 
 **Result: 66 of 66 tests passed.**
 
@@ -12,8 +12,8 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-06 18:17:41. Each row
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `1` |
-| 2 | Run the matching procedure for a batch | ALLOWED | ALLOWED | PASS | `7 \| SYN Anbu Children's Home \| 2.76 \| 32 \| 211 \| 100.0 \| 29.9 \| 81.6 \| 85.1 \| 35.6 \| 70.97 \| ELIGIBLE / 10 \| S` |
+| 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `4` |
+| 2 | Run the matching procedure for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1349 \| 100.0 \| 60.6 \| 85.7 \| 97.9 \| 33.2 \| 76.16 \| ELIGIBLE / 10` |
 | 3 | Post a batch and withdraw it (own mess, via procedures) | ALLOWED | ALLOWED | PASS | `CANCELLED` |
 | 4 | Log a meal (own forecasting data), rolled back | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
 | 5 | Read staff names (granted columns) | ALLOWED | ALLOWED | PASS | `SYN Platform Admin 1` |
@@ -32,10 +32,10 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-06 18:17:41. Each row
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `488 \| 211` |
-| 2 | See its match ranking for a batch | ALLOWED | ALLOWED | PASS | `7 \| SYN Anbu Children's Home \| 2.76 \| 32 \| 210 \| 100.0 \| 29.9 \| 81.6 \| 85.0 \| 35.6 \| 70.97 \| ELIGIBLE / 10 \| S` |
+| 1 | Read the live feed view | ALLOWED | ALLOWED | PASS | `419 \| 169 / 420 \| 179` |
+| 2 | See its match ranking for a batch | ALLOWED | ALLOWED | PASS | `12 \| SYN Little Steps Orphanage \| 2.15 \| 29 \| 1349 \| 100.0 \| 60.6 \| 85.7 \| 97.9 \| 33.2 \| 76.16 \| ELIGIBLE / 10` |
 | 3 | Update its need and capacity (granted columns), rolled back | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
-| 4 | Read the fairness dashboard view | ALLOWED | ALLOWED | PASS | `9 \| 0.869 \| 0.111` |
+| 4 | Read the fairness dashboard view | ALLOWED | ALLOWED | PASS | `9 \| 0.85 \| 0.111` |
 | 5 | Set reserved_kg (trigger-kept counter) | DENIED | DENIED | PASS | `ERROR 1143: UPDATE command denied to user 'mb_shelter'@'localhost' for column 'reserved_kg' in table 'shelter_day'` |
 | 6 | INSERT a claim directly (skipping the locking procedure) | DENIED | DENIED | PASS | `ERROR 1142: INSERT command denied to user 'mb_shelter'@'localhost' for table 'claim'` |
 | 7 | Mark a batch CLAIMED directly | DENIED | DENIED | PASS | `ERROR 1142: UPDATE command denied to user 'mb_shelter'@'localhost' for table 'surplus_batch'` |
@@ -46,13 +46,13 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-06 18:17:41. Each row
 | 12 | Read phone numbers | DENIED | DENIED | PASS | `ERROR 1143: SELECT command denied to user 'mb_shelter'@'localhost' for column 'phone' in table 'app_user'` |
 | 13 | Read the audit log | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_shelter'@'localhost' for table 'audit_log'` |
 | 14 | Delete custody history | DENIED | DENIED | PASS | `ERROR 1142: DELETE command denied to user 'mb_shelter'@'localhost' for table 'custody_event'` |
-| 15 | Rank the live feed by its own match score (Stage 6) | ALLOWED | ALLOWED | PASS | `488 \| 70.95` |
+| 15 | Rank the live feed by its own match score (Stage 6) | ALLOWED | ALLOWED | PASS | `419 \| NULL / 420 \| NULL` |
 
 ## Volunteer  (`mb_volunteer` → role `r_volunteer`)
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | See trips and stops | ALLOWED | ALLOWED | PASS | `407 \| COMPLETED / 406 \| COMPLETED` |
+| 1 | See trips and stops | ALLOWED | ALLOWED | PASS | `352 \| IN_PROGRESS / 351 \| COMPLETED` |
 | 2 | Read contact phone of sites' staff (granted column) | ALLOWED | ALLOWED | PASS | `SYN Mess Admin A \| 9100000003` |
 | 3 | Go off duty and back on (via procedure) | ALLOWED | ALLOWED | PASS | `1` |
 | 4 | Record a pickup on SOMEONE ELSE's trip (procedure checks) | REFUSED | REFUSED | PASS | `ERROR 1644: Not your open pickup stop` |
@@ -63,7 +63,7 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-06 18:17:41. Each row
 | 9 | Read e-mail addresses | DENIED | DENIED | PASS | `ERROR 1143: SELECT command denied to user 'mb_volunteer'@'localhost' for column 'email' in table 'app_user'` |
 | 10 | Change matching policy weights | DENIED | DENIED | PASS | `ERROR 1142: UPDATE command denied to user 'mb_volunteer'@'localhost' for table 'scoring_weight'` |
 | 11 | Read the audit log | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_volunteer'@'localhost' for table 'audit_log'` |
-| 12 | Read the pickup queue view (Stage 6) | ALLOWED | ALLOWED | PASS | `379 \| SYN Mess D (Special) \| SYN Gandhi Nagar Community Kitchen \| 15.00 / 384 \| SYN Mess A (Veg) \| SYN Temple ` |
+| 12 | Read the pickup queue view (Stage 6) | ALLOWED | ALLOWED | PASS | `328 \| SYN Mess D (Special) \| SYN Gandhi Nagar Community Kitchen \| 15.00` |
 | 13 | Read what is loaded on trips (Stage 6 view) | ALLOWED | ALLOWED | PASS | `2 \| 3 \| 7.85 / 3 \| 1 \| 10.89` |
 | 14 | Read match scores through the pickup view (column not in view) | ERROR | ERROR | PASS | `ERROR 1054: Unknown column 'match_score' in 'field list'` |
 
@@ -71,7 +71,7 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-06 18:17:41. Each row
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | Read the audit log | ALLOWED | ALLOWED | PASS | `2503` |
+| 1 | Read the audit log | ALLOWED | ALLOWED | PASS | `2142` |
 | 2 | Change a policy weight (audited with its login), rolled back | ALLOWED | ALLOWED | PASS | `mb_platform_admin@localhost \| {"weight": 0.300} \| {"weight": 0.350}` |
 | 3 | Run the auto-expire job | ALLOWED | ALLOWED | PASS | `(ok, no rows returned)` |
 | 4 | Edit custody history | DENIED | DENIED | PASS | `ERROR 1142: UPDATE command denied to user 'mb_platform_admin'@'localhost' for table 'custody_event'` |
@@ -98,8 +98,8 @@ Run by `tools/rbac_test.py` against MySQL 8.4.9 at 2026-10-06 18:17:41. Each row
 
 | # | Attempt | Expected | Actual | | MySQL said |
 |---|---|---|---|---|---|
-| 1 | Read the impact summary view | ALLOWED | ALLOWED | PASS | `10291 \| 3143.13` |
-| 2 | Read the daily impact view | ALLOWED | ALLOWED | PASS | `37` |
+| 1 | Read the impact summary view | ALLOWED | ALLOWED | PASS | `9034 \| 2752.99` |
+| 2 | Read the daily impact view | ALLOWED | ALLOWED | PASS | `31` |
 | 3 | Read people (app_user) | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_public'@'localhost' for table 'app_user'` |
 | 4 | Read the live feed (only for logged-in shelters) | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_public'@'localhost' for table 'v_live_feed'` |
 | 5 | Read shelter fairness detail (names of shelters) | DENIED | DENIED | PASS | `ERROR 1142: SELECT command denied to user 'mb_public'@'localhost' for table 'v_shelter_fairness'` |

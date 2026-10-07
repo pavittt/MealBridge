@@ -18,6 +18,7 @@
 --     facts. They must be checked in the field trial (TO VERIFY).
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 DROP FUNCTION IF EXISTS fn_distance_km;
 DROP FUNCTION IF EXISTS fn_travel_minutes;

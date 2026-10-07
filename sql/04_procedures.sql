@@ -30,6 +30,7 @@
 --   sp_generate_forecast surplus forecast + shelter pre-alerts
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 DROP PROCEDURE IF EXISTS sp_register_site;
 DROP PROCEDURE IF EXISTS sp_post_batch;

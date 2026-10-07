@@ -14,6 +14,7 @@
 -- 'today' is created with the live procedures (sp_post_batch, ...).
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 SET SESSION max_sp_recursion_depth = 2;   -- seed_trip falls back to single-batch trips
 -- the Monday on or before 30 days ago, so day 5 and 6 of each week are real weekends
 SET @d0 = CURRENT_DATE - INTERVAL 30 DAY - INTERVAL WEEKDAY(CURRENT_DATE - INTERVAL 30 DAY) DAY;

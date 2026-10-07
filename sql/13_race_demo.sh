@@ -3,10 +3,19 @@
 # MealBridge : TWO SESSIONS RACE FOR ONE BATCH        Stage 4 deliverable
 # Real output: 13_race_demo.output.txt
 #
+# Which shelters race is chosen at run time, not hard-coded. The seed
+# gives every shelter a different capacity each day, so a fixed shelter
+# can already be (nearly) full "today" and its claim would then fail the
+# capacity guard (CHECK chk_sd_reserved) instead of losing the race. The
+# script asks fn_match_score, the same eligibility test sp_claim_batch
+# uses (diet, capacity left today, distance, time), for the two best
+# eligible shelters per batch. Race 2 uses two other shelters than race 1,
+# so race 1's reservation cannot eat into race 2's capacity.
+#
 # RACE 1 (the real claim procedure, layer 1 = row lock):
-#   Session A (shelter "Hospital Attendants Rest House", user 12) calls sp_claim_batch
+#   Session A (best eligible shelter) calls sp_claim_batch
 #   and, for the demo only, holds the row lock for 3 s (@demo_hold_seconds).
-#   Session B (shelter "Katpadi Night Shelter", user 11) calls the same
+#   Session B (second best eligible shelter) calls the same
 #   procedure 0.5 s later for the SAME batch.
 #   A monitor session reads performance_schema.data_locks / data_lock_waits
 #   while B is blocked, to show the lock that B waits on.
@@ -34,22 +43,52 @@ ts() { date +%H:%M:%S.%3N; }
 B1=$($Q -e "SELECT batch_id FROM surplus_batch WHERE description='SYN Sambar rice (live demo)'")
 B2=$($Q -e "SELECT batch_id FROM surplus_batch WHERE description='SYN Vegetable kurma (live demo)'")
 
+# pick_shelters BATCH EXCLUDE_SITES -> "site user site user" of the two
+# eligible shelters with the highest match score for BATCH right now.
+pick_shelters() {
+  $Q -e "SELECT s.site_id, u.user_id
+           FROM shelter s
+           JOIN app_user u ON u.site_id = s.site_id AND u.role = 'SHELTER' AND u.is_active
+          WHERE s.site_id NOT IN ($2)
+            AND fn_match_score($1, s.site_id, NOW()) IS NOT NULL
+          ORDER BY fn_match_score($1, s.site_id, NOW()) DESC, s.site_id
+          LIMIT 2" | tr '\n\t' '  '
+}
+read -r S1A U1A S1B U1B <<< "$(pick_shelters "$B1" 0)"
+read -r S2A U2A S2B U2B <<< "$(pick_shelters "$B2" "${S1A:-0},${S1B:-0}")"
+if [ -z "${U1B:-}" ] || [ -z "${U2B:-}" ]; then
+  echo "Not enough eligible shelters with capacity left today. Reload sql/setup.sql and re-run." >&2
+  exit 1
+fi
+# raw INSERT values for race 2: the real score and distance, as sp_claim_batch would store
+claim_vals() {  # claim_vals BATCH SITE USER
+  $Q -e "SELECT CONCAT_WS(', ', $1, $2, $3, fn_match_score($1, $2, NOW()),
+                          ROUND(fn_distance_km(m.location, t.location), 2))
+           FROM surplus_batch b JOIN site m ON m.site_id = b.mess_site_id
+           JOIN site t ON t.site_id = $2 WHERE b.batch_id = $1"
+}
+V2A=$(claim_vals "$B2" "$S2A" "$U2A")
+V2B=$(claim_vals "$B2" "$S2B" "$U2B")
+shelter_name() { $Q -e "SELECT name FROM site WHERE site_id = $1"; }
+
 {
 echo "MealBridge race demo, $(date '+%Y-%m-%d %H:%M:%S'), MySQL $($Q -e 'SELECT VERSION()')"
 echo "Isolation level: $($Q -e 'SELECT @@transaction_isolation')"
 echo
 echo "=================== RACE 1: two shelters call sp_claim_batch($B1) ==================="
+echo "Session A: $(shelter_name $S1A) (site $S1A, user $U1A)"
+echo "Session B: $(shelter_name $S1B) (site $S1B, user $U1B)"
 $M -e "SELECT batch_id, description, quantity_kg, status, safe_until FROM surplus_batch WHERE batch_id=$B1"
 
 # Session A: holds the lock for 3 seconds
 ( $M -e "SET @demo_hold_seconds = 3;
           SELECT 'A' AS session, NOW(3) AS calls_at;
-          CALL sp_claim_batch(12, $B1, @claim, @result);
+          CALL sp_claim_batch($U1A, $B1, @claim, @result);
           SELECT 'A' AS session, NOW(3) AS returns_at, @claim AS claim_id, @result AS result;" > /tmp/race_a.txt 2>&1 ) &
 sleep 0.5
 # Session B: same batch, half a second later
 ( $M -e "SELECT 'B' AS session, NOW(3) AS calls_at;
-          CALL sp_claim_batch(11, $B1, @claim, @result);
+          CALL sp_claim_batch($U1B, $B1, @claim, @result);
           SELECT 'B' AS session, NOW(3) AS returns_at, @claim AS claim_id, @result AS result;" > /tmp/race_b.txt 2>&1 ) &
 sleep 1
 echo
@@ -76,8 +115,10 @@ $M -e "SELECT c.claim_id, t.name AS shelter, c.status, c.claimed_at, c.match_sco
 
 echo
 echo "=================== RACE 2: raw INSERTs without FOR UPDATE, batch $B2 ==================="
+echo "Session A: $(shelter_name $S2A) (site $S2A, user $U2A)"
+echo "Session B: $(shelter_name $S2B) (site $S2B, user $U2B)"
 ( $M -e "START TRANSACTION;
-          INSERT INTO claim (batch_id, shelter_site_id, claimed_by, match_score, distance_km) VALUES ($B2, 7, 9, 60, 2.8);
+          INSERT INTO claim (batch_id, shelter_site_id, claimed_by, match_score, distance_km) VALUES ($V2A);
           SELECT 'A' AS session, NOW(3) AS inserted_at, 'holding the transaction open 3 s' AS note;
           DO SLEEP(3);
           COMMIT;
@@ -86,7 +127,7 @@ sleep 1
 ( $M -e "START TRANSACTION;
           SELECT 'B' AS session, NOW(3) AS starts_at,
                  (SELECT status FROM surplus_batch WHERE batch_id = $B2) AS status_B_sees_in_its_snapshot;
-          INSERT INTO claim (batch_id, shelter_site_id, claimed_by, match_score, distance_km) VALUES ($B2, 9, 11, 60, 3.0);
+          INSERT INTO claim (batch_id, shelter_site_id, claimed_by, match_score, distance_km) VALUES ($V2B);
           SELECT 'B' AS session, NOW(3) AS after_insert;
           COMMIT;" > /tmp/race_b2.txt 2>&1;
   echo "(B finished at $(ts))" >> /tmp/race_b2.txt ) &

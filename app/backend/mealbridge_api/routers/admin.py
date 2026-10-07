@@ -8,7 +8,7 @@ everything but cannot change custody or audit history (tested).
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from ..auth import require, role_db
@@ -39,6 +39,9 @@ class WeightIn(BaseModel):
 
 @router.put("/weights/{key}")
 def set_weight(key: str, body: WeightIn, user=Depends(ADMIN), db=Depends(role_db)):
+    # an unknown key would update 0 rows and still look saved
+    if not db.one("SELECT 1 AS known FROM scoring_weight WHERE weight_key = %s", (key,)):
+        raise HTTPException(404, f"No matching weight called {key}")
     ev = Evidence()
     db.query("UPDATE scoring_weight SET weight_value = %s WHERE weight_key = %s", (body.weight_value, key))
     return ok(db, {"weight_key": key, "weight_value": body.weight_value}, action="set_weight", evidence=ev.collect())

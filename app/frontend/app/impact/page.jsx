@@ -54,7 +54,7 @@ export default function ImpactPage() {
             <Stat label="Meals saved" value={fmt.n(s.meals_saved)} sub="meal-equivalents delivered" tone="leaf" />
             <Stat label="Food diverted" value={fmt.kg(s.kg_diverted)} sub={`${s.batches_delivered} of ${s.batches_posted} batches`} />
             <Stat label="Carbon avoided" value={`${fmt.n(s.co2e_avoided_kg)} kg`} sub="CO₂e avoided" />
-            <Stat label="Rescue rate" value={`${s.rescue_rate_pct}%`} sub={`${fmt.kg(s.kg_expired)} still expired`} tone="accent" />
+            <Stat label="Rescue rate" value={`${s.rescue_rate_pct}%`} sub={`${fmt.kg(s.kg_expired)} expired`} tone="accent" />
             <Stat label="Response time" value={`${s.avg_response_min} min`} sub={`post → delivery ${s.avg_post_to_delivery_min} min`} />
           </>}
         </div>

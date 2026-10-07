@@ -46,12 +46,21 @@ export default function SchemaPage() {
   const idx = (d?.indexes || []).filter((i) => i.tbl === table);
   const objects = useMemo(() => (d?.objects || []).filter((o) => o.name.toLowerCase().includes(q.toLowerCase())), [d, q]);
 
+  // the counts in the header come from what the API just read, so they
+  // stay right when a procedure or view is added
+  const count = (pred) => (d ? (d.tables || []).filter(pred).length : null);
+  const kinds = (k) => (d ? (d.objects || []).filter((o) => o.kind === k).length : null);
+  const n = (v, one, many) => (v == null ? "…" : `${v} ${v === 1 ? one : many}`);
+  const events = kinds("EVENT");
+
   if (!user) return null;
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
       <PageHeader title="Schema explorer">
-        24 tables, 10 views, 12 functions, 12 procedures, 18 triggers and one scheduled event. Read live from
-        information_schema, so what you see is the database as it is right now.
+        {n(count((t) => t.type === "BASE TABLE"), "table", "tables")}, {n(count((t) => t.type === "VIEW"), "view", "views")},{" "}
+        {n(kinds("FUNCTION"), "function", "functions")}, {n(kinds("PROCEDURE"), "procedure", "procedures")},{" "}
+        {n(kinds("TRIGGER"), "trigger", "triggers")} and {events === 1 ? "one scheduled event" : n(events, "scheduled event", "scheduled events")}.
+        Read live from information_schema, so what you see is the database as it is right now.
       </PageHeader>
 
       <div className="flex gap-2 mb-5 flex-wrap">
@@ -71,7 +80,7 @@ export default function SchemaPage() {
               <button key={t.name} onClick={() => setTable(t.name)} aria-current={table === t.name}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm font-mono ${table === t.name ? "bg-surface-2 font-bold" : "hover:bg-surface-2"}`}>
                 {t.name}
-                <span className="float-right text-[10px] text-muted font-sans mt-0.5">{t.type === "VIEW" ? "view" : fmt.n(t.approx_rows)}</span>
+                <span className="float-right text-[10px] text-muted font-sans mt-0.5">{t.type === "VIEW" ? "view" : `≈ ${fmt.n(t.approx_rows)}`}</span>
               </button>
             ))}
           </nav>

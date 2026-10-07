@@ -1508,6 +1508,10 @@ END$$
 -- sp_record_delivery : volunteer is at a DROP stop. The shelter's
 --   hygiene check result decides the outcome for every claim dropped
 --   here: pass -> DELIVERED / FULFILLED, fail -> REJECTED.
+--   PERISHABILITY RULE (R9) at the door: food that reaches the shelter
+--   after its safe_until time is REJECTED ("arrived after safe-until
+--   time") even if the volunteer ticks the hygiene check, so it can never
+--   be counted as a meal saved. Same rule as the seed history.
 --   When the last stop is done, the trip is COMPLETED.
 -- ---------------------------------------------------------------------
 CREATE PROCEDURE sp_record_delivery(IN p_user_id INT UNSIGNED,
@@ -1532,25 +1536,36 @@ BEGIN
     UPDATE trip_stop SET arrived_at = COALESCE(arrived_at, NOW()), departed_at = NOW()
      WHERE trip_id = p_trip_id AND stop_seq = p_stop_seq;
 
+    -- the outcome of each claim dropped here, decided ONCE into a temp
+    -- table: pass only if the check passed AND the food is still inside
+    -- its safe time. (The claim trigger updates surplus_batch, so the
+    -- claim UPDATE below must not read surplus_batch itself: error 1442.)
+    DROP TEMPORARY TABLE IF EXISTS tmp_drop_outcome;
+    CREATE TEMPORARY TABLE tmp_drop_outcome
+    SELECT c.claim_id, c.batch_id,
+           (p_hygiene_ok AND b.safe_until > NOW()) AS passed,
+           IF(b.safe_until <= NOW(), 'arrived after safe-until time',
+              IF(p_hygiene_ok, NULL, COALESCE(p_notes, 'failed hygiene check'))) AS reason
+      FROM trip_item ti
+      JOIN claim c         ON c.claim_id = ti.claim_id
+      JOIN surplus_batch b ON b.batch_id = c.batch_id
+     WHERE ti.trip_id = p_trip_id AND ti.drop_seq = p_stop_seq AND c.status = 'ACTIVE';
+
     INSERT INTO custody_event (batch_id, claim_id, trip_id, event_type, actor_user_id,
                                temperature_c, hygiene_ok, notes)
-    SELECT c.batch_id, c.claim_id, p_trip_id, 'HYGIENE_CHECK', p_user_id,
-           p_temperature_c, p_hygiene_ok, p_notes
-      FROM trip_item ti JOIN claim c ON c.claim_id = ti.claim_id
-     WHERE ti.trip_id = p_trip_id AND ti.drop_seq = p_stop_seq AND c.status = 'ACTIVE';
+    SELECT o.batch_id, o.claim_id, p_trip_id, 'HYGIENE_CHECK', p_user_id,
+           p_temperature_c, o.passed, COALESCE(o.reason, p_notes)
+      FROM tmp_drop_outcome o;
 
-    IF p_hygiene_ok THEN
-      INSERT INTO custody_event (batch_id, claim_id, trip_id, event_type, actor_user_id)
-      SELECT c.batch_id, c.claim_id, p_trip_id, 'DELIVERED', p_user_id
-        FROM trip_item ti JOIN claim c ON c.claim_id = ti.claim_id
-       WHERE ti.trip_id = p_trip_id AND ti.drop_seq = p_stop_seq AND c.status = 'ACTIVE';
-    END IF;
+    INSERT INTO custody_event (batch_id, claim_id, trip_id, event_type, actor_user_id)
+    SELECT o.batch_id, o.claim_id, p_trip_id, 'DELIVERED', p_user_id
+      FROM tmp_drop_outcome o WHERE o.passed;
 
     -- claim AU trigger turns these into DELIVERED / CANCELLED batches
-    UPDATE claim c JOIN trip_item ti ON ti.claim_id = c.claim_id
-       SET c.status = IF(p_hygiene_ok, 'FULFILLED', 'REJECTED'),
-           c.close_reason = IF(p_hygiene_ok, NULL, COALESCE(p_notes, 'failed hygiene check'))
-     WHERE ti.trip_id = p_trip_id AND ti.drop_seq = p_stop_seq AND c.status = 'ACTIVE';
+    UPDATE claim c JOIN tmp_drop_outcome o ON o.claim_id = c.claim_id
+       SET c.status = IF(o.passed, 'FULFILLED', 'REJECTED'),
+           c.close_reason = o.reason;
+    DROP TEMPORARY TABLE IF EXISTS tmp_drop_outcome;
 
     UPDATE pickup_trip
        SET status = 'COMPLETED', completed_at = NOW()
@@ -1666,7 +1681,7 @@ END$$
 --
 --   It reuses the same functions as the ranking, so the explanation can
 --   never disagree with the real decision:
---     hard rules : status, fn_is_diet_compatible (diet), fn_capacity_score
+--     hard rules : status, shelter open (site.is_active), fn_is_diet_compatible (diet), fn_capacity_score
 --                  (space left), fn_distance_score (15 km radius),
 --                  fn_perishability_score (arrival + 30 min buffer)
 --     factors    : fn_need_score, fn_fairness_score, fn_distance_score,
@@ -1675,7 +1690,7 @@ END$$
 --
 --   Output: one row per check, in reading order.
 --     kind        RULE (must pass), FACTOR (part of the score), RESULT
---     code        STATUS, DIET, CAPACITY, RADIUS, TIME, NEED, ...
+--     code        STATUS, OPEN, DIET, CAPACITY, RADIUS, TIME, NEED, ...
 --     label       short name
 --     passed      1 / 0 for rules and the result, NULL for factors
 --     explanation a plain sentence with this shelter's own numbers
@@ -1690,6 +1705,7 @@ BEGIN
   DECLARE v_now     DATETIME DEFAULT NOW();
   DECLARE v_shelter INT UNSIGNED;
   DECLARE v_status  VARCHAR(12);
+  DECLARE v_open    BOOLEAN;
   DECLARE v_desc    VARCHAR(200);
   DECLARE v_qty     DECIMAL(7,2);
   DECLARE v_safe    DATETIME;
@@ -1723,11 +1739,13 @@ BEGIN
   SET v_travel = fn_travel_minutes(v_km);
   SET v_left   = TIMESTAMPDIFF(SECOND, v_now, v_safe) / 60;
 
-  -- 3. this shelter's own capacity and need for today
+  -- 3. this shelter's own capacity and need for today, and whether the
+  --    shelter is still open (fn_match_score excludes closed shelters)
   SELECT COALESCE(sd.capacity_kg, s.default_capacity_kg), COALESCE(sd.reserved_kg, 0),
-         COALESCE(sd.meals_needed, s.beneficiary_count)
-    INTO v_cap, v_res, v_needed
+         COALESCE(sd.meals_needed, s.beneficiary_count), t.is_active
+    INTO v_cap, v_res, v_needed, v_open
     FROM shelter s
+    JOIN site t ON t.site_id = s.site_id
     LEFT JOIN shelter_day sd ON sd.shelter_site_id = s.site_id AND sd.day = DATE(v_now)
    WHERE s.site_id = v_shelter;
   SET v_free = v_cap - v_res;
@@ -1769,6 +1787,10 @@ BEGIN
          IF(v_status = 'AVAILABLE', 'Nobody has claimed this batch yet.',
             CONCAT('This batch is already ', LOWER(v_status), ', so it can no longer be claimed.')) AS explanation,
          NULL AS score, NULL AS weight
+  UNION ALL
+  SELECT 'RULE', 'OPEN', 'Shelter open', v_open,
+         IF(v_open, 'Your shelter is active on the platform.',
+            'Your shelter is marked closed on the platform, so it cannot receive food.'), NULL, NULL
   UNION ALL
   SELECT 'RULE', 'DIET', 'Diet', (v_bad IS NULL),
          IF(v_bad IS NULL, 'Nothing in this batch is on your diet exclusion list.',
@@ -6063,8 +6085,9 @@ END$$
 -- batches. Uses the real sp_create_trip for stop order and ETAs, then
 -- fills in the historical arrival times, custody events and outcome.
 -- Volunteer = verified, available, can carry the load, fewest trips so
--- far (spreads the work). Food arriving after safe_until, or the batch
--- listed in p_fail_batch, fails the hygiene check.
+-- far (spreads the work). Food handed over (arrival + 4 min) after
+-- safe_until, or the batch listed in p_fail_batch, fails the hygiene
+-- check: the same rule sp_record_delivery applies to live deliveries.
 CREATE PROCEDURE seed_trip(p_batches JSON, p_start DATETIME, p_fail_batch INT UNSIGNED, p_temp_drop DECIMAL(4,1))
 proc: BEGIN
   DECLARE v_claims JSON; DECLARE v_load DECIMAL(9,2); DECLARE v_vol INT UNSIGNED;
@@ -6131,8 +6154,8 @@ proc: BEGIN
              (SELECT user_id FROM app_user WHERE site_id = c.shelter_site_id AND role = 'SHELTER' LIMIT 1),
              CASE WHEN b.batch_id = p_fail_batch THEN p_temp_drop
                   WHEN b.storage = 'HOT_HELD' THEN 62.0 WHEN b.storage = 'CHILLED' THEN 6.0 ELSE 30.0 END,
-             (v_arr < b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0)),
-             CASE WHEN v_arr >= b.safe_until THEN 'arrived after safe-until time'
+             (v_arr + INTERVAL 4 MINUTE <= b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0)),
+             CASE WHEN v_arr + INTERVAL 4 MINUTE > b.safe_until THEN 'arrived after safe-until time'
                   WHEN b.batch_id = p_fail_batch THEN 'hot food below 60 C on arrival' END
         FROM trip_item ti JOIN claim c ON c.claim_id = ti.claim_id JOIN surplus_batch b ON b.batch_id = c.batch_id
        WHERE ti.trip_id = v_trip AND ti.drop_seq = v_seq;
@@ -6140,14 +6163,14 @@ proc: BEGIN
       SELECT c.batch_id, c.claim_id, v_trip, 'DELIVERED', v_arr + INTERVAL 4 MINUTE, v_vol
         FROM trip_item ti JOIN claim c ON c.claim_id = ti.claim_id JOIN surplus_batch b ON b.batch_id = c.batch_id
        WHERE ti.trip_id = v_trip AND ti.drop_seq = v_seq
-         AND v_arr < b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0);
+         AND v_arr + INTERVAL 4 MINUTE <= b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0);
       -- outcome is decided first into a temp table: the claim trigger
       -- updates surplus_batch, so the UPDATE itself must not read it (error 1442)
       DROP TEMPORARY TABLE IF EXISTS tmp_outcome;
       CREATE TEMPORARY TABLE tmp_outcome
       SELECT c.claim_id,
-             IF(v_arr < b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0), 'FULFILLED', 'REJECTED') AS new_status,
-             IF(v_arr >= b.safe_until, 'arrived after safe-until time',
+             IF(v_arr + INTERVAL 4 MINUTE <= b.safe_until AND b.batch_id <> COALESCE(p_fail_batch, 0), 'FULFILLED', 'REJECTED') AS new_status,
+             IF(v_arr + INTERVAL 4 MINUTE > b.safe_until, 'arrived after safe-until time',
                 IF(b.batch_id = p_fail_batch, 'failed hygiene check: temperature', NULL)) AS reason
         FROM trip_item ti JOIN claim c ON c.claim_id = ti.claim_id JOIN surplus_batch b ON b.batch_id = c.batch_id
        WHERE ti.trip_id = v_trip AND ti.drop_seq = v_seq;

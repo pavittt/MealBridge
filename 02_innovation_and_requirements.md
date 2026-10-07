@@ -55,7 +55,7 @@ The honest position before fieldwork: the impact figures the system reports are 
 
 ### 1.5 Maturity (TRL)
 
-Target TRL 4 to 5. The evidence for it: the database runs on MySQL 8.0.46 with 24 tables, 12 functions, 12 procedures, 18 triggers, 10 views and role-based access, loaded with about 30 days of synthetic history; the concurrency guarantee, the index effects and the role grants are demonstrated with real captured output (`sql/*.output.md`, 66 of 66 access tests passing); and the web application drives the same procedures end to end. What is still missing for TRL 5 is a field trial with one real mess and one real shelter, which is the next step after the internal review.
+Target TRL 4 to 5. The evidence for it: the database runs on MySQL 8.0.46 with 24 tables, 12 functions, 13 procedures, 18 triggers, 10 views and role-based access, loaded with about 30 days of synthetic history; the concurrency guarantee, the index effects and the role grants are demonstrated with real captured output (`sql/*.output.md`, 67 of 67 access tests passing); and the web application drives the same procedures end to end. What is still missing for TRL 5 is a field trial with one real mess and one real shelter, which is the next step after the internal review.
 
 ---
 
@@ -164,7 +164,7 @@ Priority: **M** must have for the internal review, **S** should have, **C** coul
 | NFR-2 | Concurrency | Zero double claims under simultaneous load | Row lock plus trigger plus unique generated column | `13_race_demo.output.txt`, race page |
 | NFR-3 | Query performance | Live feed, mess dashboard, audit timeline and fairness queries use an index, not a full scan | Sixteen indexes chosen per access path | `12_explain_indexes.output.md`, EXPLAIN page |
 | NFR-4 | Scalability | Plans stay index-based at 200,000 batch rows | Composite indexes on the filter and sort columns; spatial index for the radius pre-filter | `12_explain_indexes.output.md` (run at 200,000 rows) |
-| NFR-5 | Least privilege | No end-user role can read what its screens do not need (e-mails, password hashes, other sites' data) | Four roles plus two service roles, column-level grants, procedure-only writes | `14_rbac_tests.output.md` (66 of 66) |
+| NFR-5 | Least privilege | No end-user role can read what its screens do not need (e-mails, password hashes, the audit log); other sites' rows are filtered by the API, because MySQL has no row-level security | Four roles plus two service roles, column-level grants, procedure-only writes | `14_rbac_tests.output.md` (67 of 67) |
 | NFR-6 | Auditability | Who changed what is always answerable; food-safety history cannot be rewritten | Audit triggers with `USER()`; append-only hash-chained custody | admin page, custody page |
 | NFR-7 | Usability | A mess admin can post a batch in under a minute on a phone | One form, three required fields beyond the dropdowns; responsive layout | timed walk-through at the internal review, **TO COLLECT** |
 | NFR-8 | Accessibility | Keyboard reachable, visible focus, contrast-checked colours, reduced-motion fallback, no colour-only meaning | Design tokens with light and dark variants, `:focus-visible`, `prefers-reduced-motion`, labels on every control, chart palette validated for colour-vision deficiency | manual keyboard pass; palette validator output in the README |

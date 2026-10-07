@@ -27,9 +27,17 @@ def feed(user=Depends(SHELTER), db=Depends(role_db)):
         "SELECT f.*, fn_match_score(f.batch_id, %s, NOW()) AS match_score "
         "  FROM v_live_feed f "
         " ORDER BY (match_score IS NULL), match_score DESC, f.minutes_left", (site,))
+    # Today's row, or the shelter's registered defaults when nobody has
+    # entered today's figures yet: the same fallback fn_capacity_score and
+    # fn_need_score use, so the card matches what the matching sees.
     today = db.one(
-        "SELECT day, meals_needed, capacity_kg, reserved_kg, capacity_kg - reserved_kg AS free_kg "
-        "  FROM shelter_day WHERE shelter_site_id = %s AND day = CURDATE()", (site,))
+        "SELECT CURDATE() AS day, COALESCE(sd.meals_needed, s.beneficiary_count) AS meals_needed, "
+        "       COALESCE(sd.capacity_kg, s.default_capacity_kg) AS capacity_kg, "
+        "       COALESCE(sd.reserved_kg, 0) AS reserved_kg, "
+        "       COALESCE(sd.capacity_kg, s.default_capacity_kg) - COALESCE(sd.reserved_kg, 0) AS free_kg "
+        "  FROM shelter s LEFT JOIN shelter_day sd "
+        "         ON sd.shelter_site_id = s.site_id AND sd.day = CURDATE() "
+        " WHERE s.site_id = %s", (site,))
     shelter = db.one(
         "SELECT t.name, s.shelter_type, s.beneficiary_count, s.has_refrigeration, "
         "       (SELECT GROUP_CONCAT(tag_code) FROM shelter_diet_exclusion e "

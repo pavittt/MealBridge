@@ -169,6 +169,7 @@ emit("-- replayed in time order through the real functions and triggers;")
 emit("-- 'today' is created with the live procedures (sp_post_batch, ...).")
 emit("-- =====================================================================")
 emit("USE mealbridge;")
+emit("SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql")
 emit("SET SESSION max_sp_recursion_depth = 2;   -- seed_trip falls back to single-batch trips")
 emit("-- the Monday on or before 30 days ago, so day 5 and 6 of each week are real weekends")
 emit("SET @d0 = CURRENT_DATE - INTERVAL 30 DAY - INTERVAL WEEKDAY(CURRENT_DATE - INTERVAL 30 DAY) DAY;")
@@ -587,5 +588,5 @@ CALL sp_record_pickup(20, @live_trip, 1, 67.5);
 CALL sp_generate_forecast(CURRENT_DATE + INTERVAL 1 DAY, TRUE);
 """)
 
-OUT.write_text("\n".join(out) + "\n")
+OUT.write_text("\n".join(out) + "\n", encoding="utf-8")
 print(f"wrote {OUT}: {batch_id} historical batches, {n_trips} trip groups, {len(logs)} meal logs")

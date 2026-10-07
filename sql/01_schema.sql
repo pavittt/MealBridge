@@ -16,6 +16,15 @@
 --     Both are justified in section 5.4 of the design document.
 -- =====================================================================
 
+-- Force the connection character set, whatever the client defaults to.
+-- The Windows mysql client connects as cp850 (the console code page).
+-- Procedures, functions and triggers remember the connection character set
+-- they were created under, so under cp850 their string literals become
+-- cp850 and comparing them with utf8mb4 columns fails with
+-- "Illegal mix of collations". SET NAMES makes setup.sql safe to load
+-- from any client, with or without --default-character-set=utf8mb4.
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
 DROP DATABASE IF EXISTS mealbridge;
 CREATE DATABASE mealbridge
   CHARACTER SET utf8mb4

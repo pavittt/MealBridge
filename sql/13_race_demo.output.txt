@@ -1,93 +1,97 @@
-MealBridge race demo, 2026-10-05 12:37:47, MySQL 8.0.46-0ubuntu0.24.04.4
+MealBridge race demo, 2026-10-07 09:26:19, MySQL 8.0.46-0ubuntu0.24.04.4
 Isolation level: REPEATABLE-READ
 
-=================== RACE 1: two shelters call sp_claim_batch(486) ===================
+=================== RACE 1: two shelters call sp_claim_batch(419) ===================
+Session A: SYN Katpadi Night Shelter (site 9, user 11)
+Session B: SYN Hospital Attendants Rest House (site 10, user 12)
 +----------+-----------------------------+-------------+-----------+---------------------+
 | batch_id | description                 | quantity_kg | status    | safe_until          |
 +----------+-----------------------------+-------------+-----------+---------------------+
-|      486 | SYN Sambar rice (live demo) |       24.00 | AVAILABLE | 2026-10-05 15:27:34 |
+|      419 | SYN Sambar rice (live demo) |       24.00 | AVAILABLE | 2026-10-07 12:16:02 |
 +----------+-----------------------------+-------------+-----------+---------------------+
 
---- monitor at 12:37:49.271: who holds which lock, and who is waiting (performance_schema) ---
+--- monitor at 09:26:21.529: who holds which lock, and who is waiting (performance_schema) ---
 +------+---------------+---------+-----------+---------------+-------------+-----------+
 | conn | tbl           | idx     | LOCK_TYPE | LOCK_MODE     | LOCK_STATUS | LOCK_DATA |
 +------+---------------+---------+-----------+---------------+-------------+-----------+
-|  380 | surplus_batch | PRIMARY | RECORD    | X,REC_NOT_GAP | GRANTED     | 486       |
-|  381 | surplus_batch | PRIMARY | RECORD    | X,REC_NOT_GAP | WAITING     | 486       |
+|  104 | surplus_batch | PRIMARY | RECORD    | X,REC_NOT_GAP | GRANTED     | 419       |
+|  105 | surplus_batch | PRIMARY | RECORD    | X,REC_NOT_GAP | WAITING     | 419       |
 +------+---------------+---------+-----------+---------------+-------------+-----------+
 +--------------+---------------+------------+
 | waiting_conn | blocking_conn | is_waiting |
 +--------------+---------------+------------+
-|          381 |           380 |          1 |
+|          105 |           104 |          1 |
 +--------------+---------------+------------+
 
 --- session A output ---
 +---------+-------------------------+
 | session | calls_at                |
 +---------+-------------------------+
-| A       | 2026-10-05 12:37:47.776 |
+| A       | 2026-10-07 09:26:20.033 |
 +---------+-------------------------+
 +---------+-------------------------+----------+---------+
 | session | returns_at              | claim_id | result  |
 +---------+-------------------------+----------+---------+
-| A       | 2026-10-05 12:37:50.788 |      383 | CLAIMED |
+| A       | 2026-10-07 09:26:23.055 |      332 | CLAIMED |
 +---------+-------------------------+----------+---------+
 --- session B output ---
 +---------+-------------------------+
 | session | calls_at                |
 +---------+-------------------------+
-| B       | 2026-10-05 12:37:48.273 |
+| B       | 2026-10-07 09:26:20.535 |
 +---------+-------------------------+
 +---------+-------------------------+----------+----------------------------------------------------+
 | session | returns_at              | claim_id | result                                             |
 +---------+-------------------------+----------+----------------------------------------------------+
-| B       | 2026-10-05 12:37:50.788 |     NULL | REJECTED: batch already CLAIMED by another shelter |
+| B       | 2026-10-07 09:26:23.055 |     NULL | REJECTED: batch already CLAIMED by another shelter |
 +---------+-------------------------+----------+----------------------------------------------------+
 
---- result in the database: exactly one live claim for batch 486 ---
-+----------+------------------------------------+--------+-------------------------+-------------+
-| claim_id | shelter                            | status | claimed_at              | match_score |
-+----------+------------------------------------+--------+-------------------------+-------------+
-|      383 | SYN Hospital Attendants Rest House | ACTIVE | 2026-10-05 12:37:50.784 |       70.93 |
-+----------+------------------------------------+--------+-------------------------+-------------+
+--- result in the database: exactly one live claim for batch 419 ---
++----------+---------------------------+--------+-------------------------+-------------+
+| claim_id | shelter                   | status | claimed_at              | match_score |
++----------+---------------------------+--------+-------------------------+-------------+
+|      332 | SYN Katpadi Night Shelter | ACTIVE | 2026-10-07 09:26:23.046 |       75.72 |
++----------+---------------------------+--------+-------------------------+-------------+
 +---------+
 | status  |
 +---------+
 | CLAIMED |
 +---------+
 
-=================== RACE 2: raw INSERTs without FOR UPDATE, batch 487 ===================
+=================== RACE 2: raw INSERTs without FOR UPDATE, batch 420 ===================
+Session A: SYN Sri Sai Old Age Home (site 8, user 10)
+Session B: SYN Sathuvachari Women's Shelter (site 14, user 16)
 --- session A output ---
 +---------+-------------------------+----------------------------------+
 | session | inserted_at             | note                             |
 +---------+-------------------------+----------------------------------+
-| A       | 2026-10-05 12:37:50.817 | holding the transaction open 3 s |
+| A       | 2026-10-07 09:26:23.110 | holding the transaction open 3 s |
 +---------+-------------------------+----------------------------------+
 +---------+-------------------------+
 | session | committed_at            |
 +---------+-------------------------+
-| A       | 2026-10-05 12:37:53.819 |
+| A       | 2026-10-07 09:26:26.113 |
 +---------+-------------------------+
 --- session B output ---
 +---------+-------------------------+-------------------------------+
 | session | starts_at               | status_B_sees_in_its_snapshot |
 +---------+-------------------------+-------------------------------+
-| B       | 2026-10-05 12:37:51.817 | AVAILABLE                     |
+| B       | 2026-10-07 09:26:24.112 | AVAILABLE                     |
 +---------+-------------------------+-------------------------------+
-ERROR 1062 (23000) at line 4: Duplicate entry '487' for key 'claim.uq_claim_one_live_per_batch'
-(B finished at 12:37:53.823)
+ERROR 1062 (23000) at line 4: Duplicate entry '420' for key 'claim.uq_claim_one_live_per_batch'
+(B finished at 09:26:26.117)
 
---- result: still exactly one live claim for batch 487 ---
+--- result: still exactly one live claim for batch 420 ---
 +----------+-----------------+--------+-----------------+
 | claim_id | shelter_site_id | status | active_batch_id |
 +----------+-----------------+--------+-----------------+
-|      384 |               7 | ACTIVE |             487 |
+|      333 |               8 | ACTIVE |             420 |
 +----------+-----------------+--------+-----------------+
 
 =================== reset (so the demo can be re-run) ===================
 +----------+-----------+
 | batch_id | status    |
 +----------+-----------+
-|      486 | AVAILABLE |
-|      487 | AVAILABLE |
+|      419 | AVAILABLE |
+|      420 | AVAILABLE |
 +----------+-----------+

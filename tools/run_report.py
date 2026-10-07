@@ -25,7 +25,7 @@ ap.add_argument("--title", default=None)
 args = ap.parse_args()
 
 path = pathlib.Path(args.sql)
-lines = path.read_text().splitlines()
+lines = path.read_text(encoding="utf-8").splitlines()
 
 # ---- split into sections -------------------------------------------------
 pre, sections, cur = [], [], None
@@ -50,7 +50,7 @@ env = dict(os.environ)
 if args.password:
     env["MYSQL_PWD"] = args.password
 res = subprocess.run(["mysql", f"-u{args.user}", "-t", "-n", "--force", "--default-character-set=utf8mb4"],
-                     input=script, text=True, capture_output=False,
+                     input=script, text=True, encoding="utf-8", capture_output=False,
                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
 raw = res.stdout
 # line numbers refer to the generated script, not the file: drop them
@@ -67,7 +67,7 @@ title = args.title or path.stem
 md = [f"# {title}", "",
       f"Real output of `{path.name}`, run as MySQL user `{args.user}` on "
       + subprocess.run(["mysql", "-uroot", "-N", "-e", "SELECT CONCAT('MySQL ', VERSION(), ' at ', NOW())"],
-                       text=True, capture_output=True).stdout.strip() + ".",
+                       text=True, encoding="utf-8", capture_output=True).stdout.strip() + ".",
       "All data is SYNTHETIC (see sql/07_seed_synthetic.sql).", ""]
 txt = []
 for i, s in enumerate(sections, 1):
@@ -82,6 +82,6 @@ pre_out = parts[0].strip()
 if pre_out:
     txt.insert(0, "(preamble output)\n" + pre_out + "\n")
 
-pathlib.Path(str(path.with_suffix("")) + ".output.md").write_text("\n".join(md) + "\n")
-pathlib.Path(str(path.with_suffix("")) + ".output.txt").write_text("\n".join(txt) + "\n")
+pathlib.Path(str(path.with_suffix("")) + ".output.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+pathlib.Path(str(path.with_suffix("")) + ".output.txt").write_text("\n".join(txt) + "\n", encoding="utf-8")
 print(f"{path.name}: {len(sections)} sections, {raw.count('ERROR ')} error lines")

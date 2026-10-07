@@ -27,6 +27,7 @@
 -- real deployment (ALTER USER ... IDENTIFIED BY ...).
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 DROP USER IF EXISTS 'mb_mess_admin'@'localhost', 'mb_shelter'@'localhost',
                     'mb_volunteer'@'localhost', 'mb_platform_admin'@'localhost',

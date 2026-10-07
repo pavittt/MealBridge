@@ -35,6 +35,7 @@
 -- session login, so the triggers write USER() explicitly.
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 DROP TRIGGER IF EXISTS trg_user_bi;
 DROP TRIGGER IF EXISTS trg_user_bu;

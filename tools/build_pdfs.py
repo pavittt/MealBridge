@@ -48,7 +48,7 @@ def embed_images(html, base):
     return re.sub(r'src="([^"]+\.png)"', repl, html)
 
 def build(md_name, pdf_name, extra_html=""):
-    md_text = (ROOT / md_name).read_text()
+    md_text = (ROOT / md_name).read_text(encoding="utf-8")
     body = markdown.markdown(md_text, extensions=["tables", "fenced_code", "sane_lists"])
     # the empty header row of the metadata table renders as a blank band; drop it
     body = body.replace("<h2>7. Relational schema</h2>", "<h2 class=\"pagebreak\">7. Relational schema</h2>")
@@ -56,7 +56,7 @@ def build(md_name, pdf_name, extra_html=""):
     html = f"<!doctype html><html><head><meta charset='utf-8'><style>{CSS}</style></head><body>{body}{extra_html}</body></html>"
     html = embed_images(html, ROOT)
     tmp = ROOT / "pdf" / (pdf_name + ".html")
-    tmp.write_text(html)
+    tmp.write_text(html, encoding="utf-8")
     out = ROOT / "pdf" / pdf_name
     subprocess.run([CHROME, "--headless", "--no-sandbox", "--disable-gpu",
                     "--no-pdf-header-footer", f"--print-to-pdf={out}", tmp.as_uri()],

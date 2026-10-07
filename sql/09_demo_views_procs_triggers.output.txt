@@ -3,16 +3,16 @@ V1. Impact dashboard headline (v_impact_summary)
 Meals saved, kg diverted, carbon avoided, expiry and response time in one row. Carbon uses the FAO 2013 global average factor (values_source says TO VERIFY).
 ------------------------------------------------------------------------------
 *************************** 1. row ***************************
-                from_day: 2026-08-31
-                  to_day: 2026-10-05
-          batches_posted: 491
-       batches_delivered: 310
-             meals_saved: 10271
-             kg_diverted: 3134.13
-         co2e_avoided_kg: 6456
-              kg_expired: 1894.11
-         rescue_rate_pct: 59.3
-        avg_response_min: 67
+                from_day: 2026-09-07
+                  to_day: 2026-10-07
+          batches_posted: 424
+       batches_delivered: 270
+             meals_saved: 9034
+             kg_diverted: 2752.99
+         co2e_avoided_kg: 5671
+              kg_expired: 1699.44
+         rescue_rate_pct: 59.0
+        avg_response_min: 66
 avg_post_to_delivery_min: 177
 
 ==============================================================================
@@ -22,16 +22,16 @@ One row per day for the dashboard charts.
 +------------+----------------+-----------+--------------+-------------+-----------------+------------+-----------------+
 | day        | batches_posted | kg_posted | kg_delivered | meals_saved | co2e_avoided_kg | kg_expired | rescue_rate_pct |
 +------------+----------------+-----------+--------------+-------------+-----------------+------------+-----------------+
-| 2026-10-05 |              6 |     84.50 |         0.00 |           0 |             0.0 |       0.00 |             0.0 |
-| 2026-10-04 |             26 |    251.41 |       161.31 |         586 |           332.3 |      73.00 |            64.2 |
-| 2026-10-03 |             27 |    256.78 |       162.90 |         520 |           335.6 |      87.66 |            63.4 |
-| 2026-10-02 |              4 |     31.27 |        17.78 |          38 |            36.6 |       0.00 |            56.9 |
-| 2026-10-01 |              4 |     25.57 |        12.51 |          27 |            25.8 |      13.06 |            48.9 |
-| 2026-09-30 |              6 |     47.59 |        26.64 |          66 |            54.9 |      20.95 |            56.0 |
-| 2026-09-29 |              6 |     42.97 |        36.42 |          99 |            75.0 |       0.00 |            84.8 |
-| 2026-09-28 |              1 |      6.99 |         0.00 |           0 |             0.0 |       0.00 |             0.0 |
-| 2026-09-27 |             28 |    262.30 |       196.50 |         643 |           404.8 |      58.97 |            74.9 |
-| 2026-09-26 |             33 |    341.61 |       233.89 |         727 |           481.8 |     100.66 |            68.5 |
+| 2026-10-07 |              6 |     84.50 |         0.00 |           0 |             0.0 |       0.00 |             0.0 |
+| 2026-10-06 |              6 |     42.97 |        36.42 |          99 |            75.0 |       0.00 |            84.8 |
+| 2026-10-05 |              1 |      6.99 |         0.00 |           0 |             0.0 |       0.00 |             0.0 |
+| 2026-10-04 |             28 |    262.30 |       196.50 |         643 |           404.8 |      58.97 |            74.9 |
+| 2026-10-03 |             33 |    341.61 |       233.89 |         727 |           481.8 |     100.66 |            68.5 |
+| 2026-10-02 |              7 |     60.69 |        37.68 |         116 |            77.6 |      16.59 |            62.1 |
+| 2026-10-01 |             12 |     90.71 |        51.11 |         210 |           105.3 |      39.60 |            56.3 |
+| 2026-09-30 |              7 |     56.01 |        40.69 |         140 |            83.8 |      15.32 |            72.6 |
+| 2026-09-29 |             12 |     97.99 |        57.77 |         204 |           119.0 |      40.22 |            59.0 |
+| 2026-09-28 |              5 |     39.66 |        33.17 |          80 |            68.3 |       6.49 |            83.6 |
 +------------+----------------+-----------+--------------+-------------+-----------------+------------+-----------------+
 
 ==============================================================================
@@ -41,15 +41,15 @@ Average and median minutes from posting to claim. The median is computed with RO
 +------------------------------------+--------+------------------+---------------------+-------------+-------------+
 | shelter                            | claims | avg_response_min | median_response_min | fastest_min | slowest_min |
 +------------------------------------+--------+------------------+---------------------+-------------+-------------+
-| SYN Sri Sai Old Age Home           |     34 |               41 |                  16 |           6 |         633 |
-| SYN Little Steps Orphanage         |     35 |               82 |                  16 |           6 |         643 |
-| SYN Gandhi Nagar Community Kitchen |     47 |               45 |                  16 |           0 |         609 |
-| SYN Arcot Road Old Age Home        |     16 |               20 |                  16 |          11 |          47 |
-| SYN Temple Annadhanam Kitchen      |     39 |               63 |                  17 |           4 |        1021 |
-| SYN Anbu Children's Home           |     41 |               49 |                  18 |           0 |         603 |
-| SYN Katpadi Night Shelter          |     55 |               91 |                  19 |           6 |        1073 |
-| SYN Sathuvachari Women's Shelter   |     33 |              144 |                  19 |           6 |         638 |
-| SYN Hospital Attendants Rest House |     80 |               52 |                  20 |           3 |         614 |
+| SYN Sri Sai Old Age Home           |     28 |               45 |                  14 |           6 |         633 |
+| SYN Anbu Children's Home           |     36 |               37 |                  15 |           0 |         573 |
+| SYN Arcot Road Old Age Home        |     14 |               19 |                  15 |          11 |          31 |
+| SYN Gandhi Nagar Community Kitchen |     42 |               48 |                  16 |           0 |         609 |
+| SYN Temple Annadhanam Kitchen      |     34 |               70 |                  17 |           4 |        1021 |
+| SYN Little Steps Orphanage         |     30 |               93 |                  17 |           6 |         643 |
+| SYN Katpadi Night Shelter          |     49 |               88 |                  18 |           6 |        1073 |
+| SYN Sathuvachari Women's Shelter   |     30 |              137 |                  19 |           6 |         638 |
+| SYN Hospital Attendants Rest House |     66 |               49 |                  20 |           3 |         597 |
 +------------------------------------+--------+------------------+---------------------+-------------+-------------+
 
 ==============================================================================
@@ -59,20 +59,20 @@ fair_ratio 1.00 = the shelter got exactly its share by number of beneficiaries. 
 +------------------------------------+---------------+---------+-------------+--------------------+----------------+--------------------+------------+
 | shelter                            | beneficiaries | batches | kg_received | kg_per_beneficiary | need_share_pct | received_share_pct | fair_ratio |
 +------------------------------------+---------------+---------+-------------+--------------------+----------------+--------------------+------------+
-| SYN Little Steps Orphanage         |            35 |      27 |      233.61 |               6.67 |            4.3 |                8.0 |       1.85 |
-| SYN Sathuvachari Women's Shelter   |            40 |      27 |      238.38 |               5.96 |            4.9 |                8.2 |       1.65 |
-| SYN Sri Sai Old Age Home           |            45 |      26 |      256.14 |               5.69 |            5.6 |                8.8 |       1.58 |
-| SYN Anbu Children's Home           |            60 |      28 |      314.02 |               5.23 |            7.4 |               10.7 |       1.45 |
-| SYN Gandhi Nagar Community Kitchen |            90 |      37 |      418.79 |               4.65 |           11.1 |               14.3 |       1.29 |
-| SYN Katpadi Night Shelter          |           120 |      44 |      469.29 |               3.91 |           14.8 |               16.1 |       1.08 |
-| SYN Hospital Attendants Rest House |           200 |      54 |      536.21 |               2.68 |           24.7 |               18.3 |       0.74 |
-| SYN Temple Annadhanam Kitchen      |           150 |      31 |      328.69 |               2.19 |           18.5 |               11.2 |       0.61 |
-| SYN Arcot Road Old Age Home        |            70 |      10 |      128.08 |               1.83 |            8.6 |                4.4 |       0.51 |
+| SYN Little Steps Orphanage         |            35 |      28 |      243.77 |               6.96 |            4.3 |                8.9 |       2.05 |
+| SYN Sathuvachari Women's Shelter   |            40 |      27 |      242.19 |               6.05 |            4.9 |                8.8 |       1.78 |
+| SYN Sri Sai Old Age Home           |            45 |      23 |      230.13 |               5.11 |            5.6 |                8.4 |       1.50 |
+| SYN Anbu Children's Home           |            60 |      26 |      296.89 |               4.95 |            7.4 |               10.8 |       1.46 |
+| SYN Gandhi Nagar Community Kitchen |            90 |      36 |      377.47 |               4.19 |           11.1 |               13.7 |       1.23 |
+| SYN Katpadi Night Shelter          |           120 |      44 |      457.41 |               3.81 |           14.8 |               16.6 |       1.12 |
+| SYN Hospital Attendants Rest House |           200 |      48 |      473.92 |               2.37 |           24.7 |               17.2 |       0.70 |
+| SYN Temple Annadhanam Kitchen      |           150 |      30 |      323.49 |               2.16 |           18.5 |               11.8 |       0.63 |
+| SYN Arcot Road Old Age Home        |            70 |       8 |      107.72 |               1.54 |            8.6 |                3.9 |       0.45 |
 +------------------------------------+---------------+---------+-------------+--------------------+----------------+--------------------+------------+
 +----------+------------+----------------+
 | shelters | jain_index | worst_possible |
 +----------+------------+----------------+
-|        9 |      0.872 |          0.111 |
+|        9 |       0.85 |          0.111 |
 +----------+------------+----------------+
 
 ==============================================================================
@@ -81,12 +81,12 @@ V5. Mess leaderboard (v_mess_leaderboard)
 +----------------------+---------+-----------+------------+-----------------+--------------------+
 | mess                 | batches | kg_posted | kg_rescued | rescue_rate_pct | rank_by_kg_rescued |
 +----------------------+---------+-----------+------------+-----------------+--------------------+
-| SYN Mess A (Veg)     |     140 |   1748.67 |    1140.97 |            65.2 |                  1 |
-| SYN Mess C (Mixed)   |     122 |   1302.07 |     843.49 |            64.8 |                  2 |
-| SYN Mess E (Mixed)   |      78 |    755.56 |     459.07 |            60.8 |                  3 |
-| SYN Mess B (Non-veg) |      89 |    887.77 |     411.08 |            46.3 |                  4 |
-| SYN Mess F (Veg)     |      40 |    387.60 |     207.47 |            53.5 |                  5 |
-| SYN Mess D (Special) |      22 |    199.34 |      72.05 |            36.1 |                  6 |
+| SYN Mess A (Veg)     |     118 |   1508.05 |     993.09 |            65.9 |                  1 |
+| SYN Mess C (Mixed)   |     104 |   1144.27 |     728.68 |            63.7 |                  2 |
+| SYN Mess E (Mixed)   |      66 |    666.42 |     408.68 |            61.3 |                  3 |
+| SYN Mess B (Non-veg) |      77 |    785.79 |     357.84 |            45.5 |                  4 |
+| SYN Mess F (Veg)     |      38 |    371.96 |     200.09 |            53.8 |                  5 |
+| SYN Mess D (Special) |      21 |    191.90 |      64.61 |            33.7 |                  6 |
 +----------------------+---------+-----------+------------+-----------------+--------------------+
 
 ==============================================================================
@@ -105,15 +105,15 @@ Shows the five component scores (0-100), the weighted match score, and why exclu
 +------------+------------------------------------+-------+------------+----------+-------+----------+----------+--------+----------+-------------+--------------------------+
 | shelter_id | shelter                            | km    | travel_min | min_left | need  | capacity | distance | perish | fairness | match_score | verdict                  |
 +------------+------------------------------------+-------+------------+----------+-------+----------+----------+--------+----------+-------------+--------------------------+
-|         12 | SYN Little Steps Orphanage         |  2.15 |         29 |     1349 | 100.0 |     61.0 |     85.7 |   97.9 |     41.3 |       78.23 | ELIGIBLE                 |
-|          9 | SYN Katpadi Night Shelter          |  3.00 |         33 |     1349 | 100.0 |     17.3 |     80.0 |   97.6 |     56.1 |       76.38 | ELIGIBLE                 |
-|         10 | SYN Hospital Attendants Rest House |  5.43 |         43 |     1349 | 100.0 |     12.3 |     63.8 |   96.8 |     54.6 |       72.17 | ELIGIBLE                 |
-|         13 | SYN Gandhi Nagar Community Kitchen |  3.40 |         34 |     1349 |  61.6 |     42.2 |     77.4 |   97.5 |     35.4 |       61.65 | ELIGIBLE                 |
-|          7 | SYN Anbu Children's Home           |  2.76 |         32 |     1349 |  31.0 |     67.5 |     81.6 |   97.7 |     32.9 |       55.26 | ELIGIBLE                 |
-|          8 | SYN Sri Sai Old Age Home           |  1.75 |         27 |     1349 | 100.0 |     48.1 |     88.4 |   98.0 |     34.6 |        NULL | EXCLUDED: diet exclusion |
-|         14 | SYN Sathuvachari Women's Shelter   |  3.04 |         33 |     1349 | 100.0 |     45.6 |     79.7 |   97.6 |     41.9 |        NULL | EXCLUDED: diet exclusion |
-|         11 | SYN Temple Annadhanam Kitchen      |  6.46 |         47 |     1349 | 100.0 |     13.7 |     57.0 |   96.5 |     80.5 |        NULL | EXCLUDED: diet exclusion |
-|         15 | SYN Arcot Road Old Age Home        | 13.35 |         76 |     1349 | 100.0 |     32.7 |     11.0 |   94.4 |     65.7 |        NULL | EXCLUDED: diet exclusion |
+|         12 | SYN Little Steps Orphanage         |  2.15 |         29 |     1349 | 100.0 |     60.6 |     85.7 |   97.9 |     33.2 |       76.16 | ELIGIBLE                 |
+|         10 | SYN Hospital Attendants Rest House |  5.43 |         43 |     1349 | 100.0 |     10.6 |     63.8 |   96.8 |     65.3 |       74.69 | ELIGIBLE                 |
+|          9 | SYN Katpadi Night Shelter          |  3.00 |         33 |     1349 | 100.0 |     17.0 |     80.0 |   97.6 |     48.6 |       74.48 | ELIGIBLE                 |
+|         13 | SYN Gandhi Nagar Community Kitchen |  3.40 |         34 |     1349 |  63.7 |     31.3 |     77.4 |   97.5 |     36.8 |       61.53 | ELIGIBLE                 |
+|          7 | SYN Anbu Children's Home           |  2.76 |         32 |     1349 |  23.1 |     83.4 |     81.6 |   97.7 |     37.7 |       55.65 | ELIGIBLE                 |
+|          8 | SYN Sri Sai Old Age Home           |  1.75 |         27 |     1349 | 100.0 |     45.1 |     88.4 |   98.0 |     36.8 |        NULL | EXCLUDED: diet exclusion |
+|         14 | SYN Sathuvachari Women's Shelter   |  3.04 |         33 |     1349 | 100.0 |     50.5 |     79.7 |   97.6 |     34.8 |        NULL | EXCLUDED: diet exclusion |
+|         11 | SYN Temple Annadhanam Kitchen      |  6.46 |         47 |     1349 | 100.0 |     14.8 |     57.0 |   96.5 |     66.7 |        NULL | EXCLUDED: diet exclusion |
+|         15 | SYN Arcot Road Old Age Home        | 13.35 |         76 |     1349 | 100.0 |     31.6 |     11.0 |   94.4 |     73.7 |        NULL | EXCLUDED: diet exclusion |
 +------------+------------------------------------+-------+------------+----------+-------+----------+----------+--------+----------+-------------+--------------------------+
 
 ==============================================================================
@@ -123,15 +123,15 @@ Doubling the FAIRNESS weight inside a transaction, re-ranking, then rolling back
 +------------+------------------------------------+-------+------------+----------+-------+----------+----------+--------+----------+-------------+--------------------------+
 | shelter_id | shelter                            | km    | travel_min | min_left | need  | capacity | distance | perish | fairness | match_score | verdict                  |
 +------------+------------------------------------+-------+------------+----------+-------+----------+----------+--------+----------+-------------+--------------------------+
-|          9 | SYN Katpadi Night Shelter          |  3.00 |         33 |     1349 | 100.0 |     17.3 |     80.0 |   97.6 |     56.1 |       72.31 | ELIGIBLE                 |
-|         12 | SYN Little Steps Orphanage         |  2.15 |         29 |     1349 | 100.0 |     61.0 |     85.7 |   97.9 |     41.3 |       70.84 | ELIGIBLE                 |
-|         10 | SYN Hospital Attendants Rest House |  5.43 |         43 |     1349 | 100.0 |     12.3 |     63.8 |   96.8 |     54.6 |       68.66 | ELIGIBLE                 |
-|         13 | SYN Gandhi Nagar Community Kitchen |  3.40 |         34 |     1349 |  61.6 |     42.2 |     77.4 |   97.5 |     35.4 |       56.40 | ELIGIBLE                 |
-|          7 | SYN Anbu Children's Home           |  2.76 |         32 |     1349 |  31.0 |     67.5 |     81.6 |   97.7 |     32.9 |       50.80 | ELIGIBLE                 |
-|          8 | SYN Sri Sai Old Age Home           |  1.75 |         27 |     1349 | 100.0 |     48.1 |     88.4 |   98.0 |     34.6 |        NULL | EXCLUDED: diet exclusion |
-|         14 | SYN Sathuvachari Women's Shelter   |  3.04 |         33 |     1349 | 100.0 |     45.6 |     79.7 |   97.6 |     41.9 |        NULL | EXCLUDED: diet exclusion |
-|         11 | SYN Temple Annadhanam Kitchen      |  6.46 |         47 |     1349 | 100.0 |     13.7 |     57.0 |   96.5 |     80.5 |        NULL | EXCLUDED: diet exclusion |
-|         15 | SYN Arcot Road Old Age Home        | 13.35 |         76 |     1349 | 100.0 |     32.7 |     11.0 |   94.4 |     65.7 |        NULL | EXCLUDED: diet exclusion |
+|         10 | SYN Hospital Attendants Rest House |  5.43 |         43 |     1349 | 100.0 |     10.6 |     63.8 |   96.8 |     65.3 |       72.82 | ELIGIBLE                 |
+|          9 | SYN Katpadi Night Shelter          |  3.00 |         33 |     1349 | 100.0 |     17.0 |     80.0 |   97.6 |     48.6 |       69.30 | ELIGIBLE                 |
+|         12 | SYN Little Steps Orphanage         |  2.15 |         29 |     1349 | 100.0 |     60.6 |     85.7 |   97.9 |     33.2 |       67.56 | ELIGIBLE                 |
+|         13 | SYN Gandhi Nagar Community Kitchen |  3.40 |         34 |     1349 |  63.7 |     31.3 |     77.4 |   97.5 |     36.8 |       56.58 | ELIGIBLE                 |
+|          7 | SYN Anbu Children's Home           |  2.76 |         32 |     1349 |  23.1 |     83.4 |     81.6 |   97.7 |     37.7 |       52.05 | ELIGIBLE                 |
+|          8 | SYN Sri Sai Old Age Home           |  1.75 |         27 |     1349 | 100.0 |     45.1 |     88.4 |   98.0 |     36.8 |        NULL | EXCLUDED: diet exclusion |
+|         14 | SYN Sathuvachari Women's Shelter   |  3.04 |         33 |     1349 | 100.0 |     50.5 |     79.7 |   97.6 |     34.8 |        NULL | EXCLUDED: diet exclusion |
+|         11 | SYN Temple Annadhanam Kitchen      |  6.46 |         47 |     1349 | 100.0 |     14.8 |     57.0 |   96.5 |     66.7 |        NULL | EXCLUDED: diet exclusion |
+|         15 | SYN Arcot Road Old Age Home        | 13.35 |         76 |     1349 | 100.0 |     31.6 |     11.0 |   94.4 |     73.7 |        NULL | EXCLUDED: diet exclusion |
 +------------+------------------------------------+-------+------------+----------+-------+----------+----------+--------+----------+-------------+--------------------------+
 +----------------+----------+--------+----------------+-------------------+-------------------+
 | table_name     | row_pk   | action | db_user        | old_values        | new_values        |
@@ -182,13 +182,13 @@ The client tries to post safe_until = +3 days; the trigger replaces it with cook
 +----------+---------------------+----------+---------------------+-----------+
 | batch_id | cooked_at           | storage  | safe_until          | status    |
 +----------+---------------------+----------+---------------------+-----------+
-|      492 | 2026-10-05 11:37:35 | HOT_HELD | 2026-10-05 15:37:35 | AVAILABLE |
+|      425 | 2026-10-07 08:26:03 | HOT_HELD | 2026-10-07 12:26:03 | AVAILABLE |
 +----------+---------------------+----------+---------------------+-----------+
 +------------+-------------------------+------------------------------------------+
 | event_type | event_time              | notes                                    |
 +------------+-------------------------+------------------------------------------+
-| COOKED     | 2026-10-05 11:37:35.000 | NULL                                     |
-| POSTED     | 2026-10-05 12:37:35.000 | 10.00 kg, safe until 2026-10-05 15:37:35 |
+| COOKED     | 2026-10-07 08:26:03.000 | NULL                                     |
+| POSTED     | 2026-10-07 09:26:03.000 | 10.00 kg, safe until 2026-10-07 12:26:03 |
 +------------+-------------------------+------------------------------------------+
 
 ==============================================================================
@@ -209,7 +209,7 @@ reserved_kg of the shelter's day goes up when it claims and back down when the c
 +-----------------+------------+-------------+-----------------+
 | shelter_site_id | day        | capacity_kg | reserved_before |
 +-----------------+------------+-------------+-----------------+
-|              10 | 2026-10-05 |       73.42 |            0.00 |
+|              10 | 2026-10-07 |       84.73 |            0.00 |
 +-----------------+------------+-------------+-----------------+
 +----------------------+
 | reserved_after_claim |
@@ -239,7 +239,7 @@ Shelter 12 (Little Steps) can take about 15 kg a day; claiming the 24 kg batch b
 +-------------+-------------+
 | capacity_kg | reserved_kg |
 +-------------+-------------+
-|       14.75 |        0.00 |
+|       14.85 |        0.00 |
 +-------------+-------------+
 ERROR 3819 (HY000): Check constraint 'chk_sd_reserved' is violated.
 +-------------------------------------+
@@ -284,24 +284,24 @@ A batch posted with 3 seconds of safe time left; after 4 s the job (the same pro
 +----------------+---------+----------------+----------------+---------------------+
 | EVENT_NAME     | STATUS  | INTERVAL_VALUE | INTERVAL_FIELD | LAST_EXECUTED       |
 +----------------+---------+----------------+----------------+---------------------+
-| ev_auto_expire | ENABLED | 5              | MINUTE         | 2026-10-05 12:37:19 |
+| ev_auto_expire | ENABLED | 5              | MINUTE         | 2026-10-07 09:25:44 |
 +----------------+---------+----------------+----------------+---------------------+
 +----------+-----------+---------------------+---------------------+
 | batch_id | status    | safe_until          | now_                |
 +----------+-----------+---------------------+---------------------+
-|      493 | AVAILABLE | 2026-10-05 12:37:38 | 2026-10-05 12:37:35 |
+|      426 | AVAILABLE | 2026-10-07 09:26:06 | 2026-10-07 09:26:03 |
 +----------+-----------+---------------------+---------------------+
 +----------+---------+---------------------+---------------------+
 | batch_id | status  | safe_until          | now_                |
 +----------+---------+---------------------+---------------------+
-|      493 | EXPIRED | 2026-10-05 12:37:38 | 2026-10-05 12:37:39 |
+|      426 | EXPIRED | 2026-10-07 09:26:06 | 2026-10-07 09:26:07 |
 +----------+---------+---------------------+---------------------+
 +------------+-------------------------+-----------------------------------------+
 | event_type | event_time              | notes                                   |
 +------------+-------------------------+-----------------------------------------+
-| COOKED     | 2026-10-05 10:37:38.000 | NULL                                    |
-| POSTED     | 2026-10-05 12:37:35.000 | 8.00 kg, safe until 2026-10-05 12:37:38 |
-| EXPIRED    | 2026-10-05 12:37:38.000 | auto-expired: safe-until time passed    |
+| COOKED     | 2026-10-07 07:26:06.000 | NULL                                    |
+| POSTED     | 2026-10-07 09:26:03.000 | 8.00 kg, safe until 2026-10-07 09:26:06 |
+| EXPIRED    | 2026-10-07 09:26:06.000 | auto-expired: safe-until time passed    |
 +------------+-------------------------+-----------------------------------------+
 
 ==============================================================================
@@ -311,12 +311,12 @@ db_user is USER() (the real login), not CURRENT_USER() (which inside a trigger i
 +----------+---------------+--------+--------+----------------+-------------------------+------------------------------------------------------------------------+
 | audit_id | table_name    | row_pk | action | db_user        | changed_at              | new_values                                                             |
 +----------+---------------+--------+--------+----------------+-------------------------+------------------------------------------------------------------------+
-|     2468 | surplus_batch | 491    | UPDATE | root@localhost | 2026-10-05 12:37:34.883 | {"qty_kg": 18.00, "status": "IN_TRANSIT", "description": "SYN Veg biry |
-|     2467 | claim         | 380    | INSERT | root@localhost | 2026-10-05 12:37:34.873 | {"km": 4.62, "batch": 491, "score": 70.56, "shelter": 7}               |
-|     2466 | surplus_batch | 491    | UPDATE | root@localhost | 2026-10-05 12:37:34.873 | {"qty_kg": 18.00, "status": "CLAIMED", "description": "SYN Veg biryani |
-|     2465 | claim         | 379    | INSERT | root@localhost | 2026-10-05 12:37:34.869 | {"km": 3.75, "batch": 490, "score": 73.19, "shelter": 13}              |
-|     2464 | surplus_batch | 490    | UPDATE | root@localhost | 2026-10-05 12:37:34.869 | {"qty_kg": 15.00, "status": "CLAIMED", "description": "SYN Curd rice ( |
-|     2463 | surplus_batch | 491    | INSERT | root@localhost | 2026-10-05 12:37:34.000 | {"mess": 6, "qty_kg": 18.00, "status": "AVAILABLE", "storage": "HOT_HE |
+|     2132 | surplus_batch | 424    | UPDATE | root@localhost | 2026-10-07 09:26:02.534 | {"qty_kg": 18.00, "status": "IN_TRANSIT", "description": "SYN Veg biry |
+|     2131 | claim         | 329    | INSERT | root@localhost | 2026-10-07 09:26:02.519 | {"km": 4.62, "batch": 424, "score": 72.20, "shelter": 7}               |
+|     2130 | surplus_batch | 424    | UPDATE | root@localhost | 2026-10-07 09:26:02.519 | {"qty_kg": 18.00, "status": "CLAIMED", "description": "SYN Veg biryani |
+|     2129 | claim         | 328    | INSERT | root@localhost | 2026-10-07 09:26:02.512 | {"km": 3.75, "batch": 423, "score": 72.70, "shelter": 13}              |
+|     2128 | surplus_batch | 423    | UPDATE | root@localhost | 2026-10-07 09:26:02.512 | {"qty_kg": 15.00, "status": "CLAIMED", "description": "SYN Curd rice ( |
+|     2127 | surplus_batch | 424    | INSERT | root@localhost | 2026-10-07 09:26:02.000 | {"mess": 6, "qty_kg": 18.00, "status": "AVAILABLE", "storage": "HOT_HE |
 +----------+---------------+--------+--------+----------------+-------------------------+------------------------------------------------------------------------+
 
 ==============================================================================

@@ -27,6 +27,15 @@
 --     Both are justified in section 5.4 of the design document.
 -- =====================================================================
 
+-- Force the connection character set, whatever the client defaults to.
+-- The Windows mysql client connects as cp850 (the console code page).
+-- Procedures, functions and triggers remember the connection character set
+-- they were created under, so under cp850 their string literals become
+-- cp850 and comparing them with utf8mb4 columns fails with
+-- "Illegal mix of collations". SET NAMES makes setup.sql safe to load
+-- from any client, with or without --default-character-set=utf8mb4.
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
 DROP DATABASE IF EXISTS mealbridge;
 CREATE DATABASE mealbridge
   CHARACTER SET utf8mb4
@@ -587,6 +596,7 @@ CREATE TABLE audit_log (
 --     facts. They must be checked in the field trial (TO VERIFY).
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 DROP FUNCTION IF EXISTS fn_distance_km;
 DROP FUNCTION IF EXISTS fn_travel_minutes;
@@ -973,6 +983,7 @@ DELIMITER ;
 --   sp_generate_forecast surplus forecast + shelter pre-alerts
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 DROP PROCEDURE IF EXISTS sp_register_site;
 DROP PROCEDURE IF EXISTS sp_post_batch;
@@ -1674,6 +1685,7 @@ DELIMITER ;
 -- session login, so the triggers write USER() explicitly.
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 DROP TRIGGER IF EXISTS trg_user_bi;
 DROP TRIGGER IF EXISTS trg_user_bu;
@@ -2073,6 +2085,7 @@ DELIMITER ;
 --     never a guessed number.
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 -- ---------------------------------------------------------------------
 -- v_live_feed : what a shelter sees right now. Only AVAILABLE batches
@@ -2322,6 +2335,7 @@ SELECT ti.trip_id,
 -- 'today' is created with the live procedures (sp_post_batch, ...).
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 SET SESSION max_sp_recursion_depth = 2;   -- seed_trip falls back to single-batch trips
 -- the Monday on or before 30 days ago, so day 5 and 6 of each week are real weekends
 SET @d0 = CURRENT_DATE - INTERVAL 30 DAY - INTERVAL WEEKDAY(CURRENT_DATE - INTERVAL 30 DAY) DAY;
@@ -7769,6 +7783,7 @@ CALL sp_generate_forecast(CURRENT_DATE + INTERVAL 1 DAY, TRUE);
 -- real deployment (ALTER USER ... IDENTIFIED BY ...).
 -- =====================================================================
 USE mealbridge;
+SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;  -- also when run on its own; see 01_schema.sql
 
 DROP USER IF EXISTS 'mb_mess_admin'@'localhost', 'mb_shelter'@'localhost',
                     'mb_volunteer'@'localhost', 'mb_platform_admin'@'localhost',

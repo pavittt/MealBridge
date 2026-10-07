@@ -49,7 +49,7 @@ export default function SchemaPage() {
   if (!user) return null;
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Database lab" title="Schema explorer">
+      <PageHeader title="Schema explorer">
         24 tables, 10 views, 12 functions, 12 procedures, 18 triggers and one scheduled event. Read live from
         information_schema, so what you see is the database as it is right now.
       </PageHeader>

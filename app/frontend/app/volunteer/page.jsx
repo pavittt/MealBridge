@@ -105,7 +105,7 @@ export default function VolunteerPage() {
   if (!user) return null;
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Volunteer" title={user.full_name}
+      <PageHeader title={user.full_name}
         actions={d?.me && <button className="btn btn-ghost" onClick={toggleDuty} aria-pressed={!!d.me.is_available}>
           <span className={`w-2.5 h-2.5 rounded-full ${d.me.is_available ? "bg-leaf" : "bg-muted"}`} />{d.me.is_available ? "On duty" : "Off duty"}</button>}>
         {d?.me ? `${fmt.title(d.me.vehicle_type)} · carries up to ${fmt.kg(d.me.max_load_kg)} · ${d.me.verified_at ? "ID verified" : "ID not verified yet"}` : " "}

@@ -385,6 +385,17 @@ rebuilds them:
 
 ## 10. Changelog
 
+**7 October 2026, lighter screens** (requested from screenshots)
+
+- Removed the small label pills above titles (role names, "Database lab", the
+  course tag on the landing page, "Follow one batch").
+- Removed the view and login captions next to charts and figures (`v_impact_daily`,
+  `v_batch_outcome`, `mb_public` and similar) and the synthetic-data and TO VERIFY
+  footnotes on every page. The SYN names and TO VERIFY markers are unchanged in the
+  database (`food_category.values_source`) and in the documents.
+- Landing page: shorter statement, and the page now ends at the "Every page" list.
+- Mess dashboard: the 14-day chart prints the kilograms on every bar.
+
 **6 October 2026, fix-and-check pass** (every page, both themes, desktop and phone width)
 
 - Schema explorer: the ER diagrams and the procedure, function, trigger and view

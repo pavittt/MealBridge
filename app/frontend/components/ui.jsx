@@ -71,11 +71,10 @@ export function Skeleton({ className = "h-24" }) {
   return <div className={`skeleton ${className}`} aria-hidden="true" />;
 }
 
-export function PageHeader({ eyebrow, title, children, actions }) {
+export function PageHeader({ title, children, actions }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mt-4 mb-10">
       <div>
-        {eyebrow && <div className="eyebrow mb-4">{eyebrow}</div>}
         <h1 className="text-4xl sm:text-5xl">{title}</h1>
         {children && <p className="text-muted mt-3 max-w-[62ch] leading-relaxed">{children}</p>}
       </div>
@@ -119,12 +118,9 @@ export function StatusChip({ status }) {
   );
 }
 
-/* the SYNTHETIC-data banner, shown on every data page */
+/* The synthetic-data note used to sit at the foot of every page. It was taken
+   off the screens on request; the SYN names and the TO VERIFY markers stay in
+   the database (food_category.values_source) and in the documents. */
 export function SynthNote() {
-  return (
-    <p className="text-[11px] text-muted mt-8">
-      All people, sites and numbers are <b>synthetic</b> (names start with "SYN"). Food safe-hours and the carbon
-      factor are planning values marked TO VERIFY in the database (food_category.values_source).
-    </p>
-  );
+  return null;
 }

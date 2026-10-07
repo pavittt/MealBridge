@@ -38,7 +38,7 @@ export default function AdminPage() {
   const c = d?.counts;
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Platform admin" title="Policy and audit"
+      <PageHeader title="Policy and audit"
         actions={<>
           <button className="btn btn-ghost" disabled={busy === "expire"} onClick={() => run("expire")}>{busy === "expire" ? "Running…" : "Run expiry job"}</button>
           <button className="btn btn-ghost" disabled={busy === "forecast"} onClick={() => run("forecast")}>{busy === "forecast" ? "Running…" : "Forecast tomorrow"}</button>

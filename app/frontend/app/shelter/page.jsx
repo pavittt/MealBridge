@@ -128,7 +128,7 @@ export default function ShelterPage() {
   let rank = 0;
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Shelter" title={d?.shelter?.name || user.site_name}>
+      <PageHeader title={d?.shelter?.name || user.site_name}>
         {d?.shelter ? `${fmt.title(d.shelter.shelter_type)} · ${d.shelter.beneficiary_count} people · ${d.shelter.has_refrigeration ? "has a fridge" : "no fridge"}${d.shelter.excludes ? ` · excludes ${d.shelter.excludes.split(",").map(fmt.title).join(", ")}` : ""}` : " "}
       </PageHeader>
       <ErrorBox error={err} />

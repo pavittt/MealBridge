@@ -50,7 +50,7 @@ export default function RacePage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Database lab" title="Two shelters, one batch"
+      <PageHeader title="Two shelters, one batch"
         actions={<button className="btn btn-primary" onClick={run} disabled={busy}>{busy ? "Racing…" : d ? "Run again" : "Run the race"}</button>}>
         Both shelters claim the same batch at the same moment. The database, not the application, decides that exactly
         one of them wins. Press the button and watch what happened, in milliseconds.

@@ -22,7 +22,7 @@ export default function CustodyPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Database lab" title="Food-safety chain of custody">
+      <PageHeader title="Food-safety chain of custody">
         Every hand-over of a batch is one append-only row. UPDATE and DELETE on this table are refused by triggers,
         even for root, and each row's hash is computed from the previous row's hash.
       </PageHeader>

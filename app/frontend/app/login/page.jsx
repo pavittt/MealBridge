@@ -67,7 +67,7 @@ export default function Login() {
 
       <section className="space-y-4" aria-labelledby="demo-h">
         <h2 id="demo-h" className="text-xl font-bold">Demo accounts</h2>
-        <p className="text-sm text-muted">Synthetic users from the seed data. Every one uses the demo password <code className="font-mono">demo1234</code>. Click one to fill the form.</p>
+        <p className="text-sm text-muted">Every demo account uses the password <code className="font-mono">demo1234</code>. Click one to fill the form.</p>
         {!groups && <Skeleton className="h-64" />}
         {groups && Object.entries(groups).map(([role, list]) => (
           <div key={role}>

@@ -163,7 +163,6 @@ export default function ScrollStory() {
   return (
     <section aria-labelledby="story-h" className="mx-auto max-w-7xl px-4 sm:px-6 py-20">
       <div className="max-w-2xl mb-8">
-        <div className="eyebrow mb-4">Follow one batch</div>
         <h2 id="story-h" className="text-3xl sm:text-5xl">Every rule lives <span className="text-glow">in the database</span></h2>
         <p className="text-muted mt-2">Four steps, each enforced by MySQL itself. The code on the right is the actual SQL from this project.</p>
       </div>

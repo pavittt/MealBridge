@@ -21,7 +21,6 @@ import Hero3D from "@/components/hero/Hero3D";
 import ScrollStory from "@/components/landing/ScrollStory";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import CountUp from "@/components/motion/CountUp";
-import { LogoMark } from "@/components/Shell";
 import { api, fmt } from "@/lib/api";
 
 const ease = [0.32, 0.72, 0, 1];
@@ -52,9 +51,9 @@ function Ticker({ s }) {
     [fmt.n(s.meals_saved), "meals delivered"],
     [fmt.kg(s.kg_diverted), "of food diverted"],
     [`${s.rescue_rate_pct}%`, "of posted food rescued"],
-    [`${fmt.n(s.co2e_avoided_kg)} kg`, "CO₂e avoided (factor to verify)"],
+    [`${fmt.n(s.co2e_avoided_kg)} kg`, "CO₂e avoided"],
     [`${fmt.n(s.avg_response_min)} min`, "average time to first claim"],
-    [`${s.from_day} → ${s.to_day}`, "synthetic data, read live from MySQL"],
+    [`${s.from_day} → ${s.to_day}`, "read live from MySQL"],
   ] : [];
   const row = (k) => (
     <div className="flex shrink-0 items-baseline gap-10 pr-10" aria-hidden={k === 1 || undefined}>
@@ -121,10 +120,7 @@ export default function Landing() {
           {/* top row: the promise on the left, live proof on the right */}
           <div className="flex flex-wrap items-start justify-between gap-8">
             <div className="max-w-md">
-              <motion.span className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-                Database Systems Lab · Track T5 Waste and Circular Economy
-              </motion.span>
-              <motion.h1 id="hero-h" className="mt-6 text-4xl sm:text-5xl leading-[1.02]"
+              <motion.h1 id="hero-h" className="text-4xl sm:text-5xl leading-[1.02]"
                          initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.9, ease }}>
                 Tonight's extra rice <span className="text-glow">reaches a shelter</span> before it spoils.
               </motion.h1>
@@ -132,11 +128,10 @@ export default function Landing() {
             <motion.div className="bezel pointer-events-auto w-full sm:w-auto" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5, duration: 0.9, ease }}>
               <div className="card px-5 py-4 min-w-[15rem]">
-                <div className="flex items-center gap-2 text-xs text-muted"><span className="live-dot" aria-hidden="true" /> Live from MySQL</div>
+                <div className="flex items-center gap-2 text-xs text-muted"><span className="live-dot" aria-hidden="true" /> Meals saved, live</div>
                 <div className="mt-2 text-4xl font-semibold tracking-tight tabular-nums text-leaf">
                   {s ? <CountUp value={s.meals_saved} format={fmt.n} /> : <span className="text-muted">…</span>}
                 </div>
-                <div className="text-xs text-muted mt-1">meals saved · <span className="font-mono">v_impact_summary</span></div>
                 {err && <div className="text-xs text-danger mt-1">{err.message}</div>}
               </div>
             </motion.div>
@@ -185,13 +180,13 @@ export default function Landing() {
       <section className="mx-auto max-w-7xl px-5 sm:px-8 py-24 sm:py-32" aria-labelledby="live-h">
         <motion.p className="display text-3xl sm:text-5xl leading-[1.12] max-w-5xl" {...rise}>
           Food that would be thrown away tonight, <span className="text-glow">matched to a shelter in minutes</span>,
-          with every rule (expiry, fair ranking, one claim per batch, a hashed custody trail) enforced by the database itself.
+          with every rule enforced by the database itself.
         </motion.p>
 
         <div className="mt-16 flex items-end justify-between flex-wrap gap-3 mb-8">
           <h2 id="live-h" className="text-2xl sm:text-3xl flex items-center gap-3"><span className="live-dot" aria-hidden="true" />Live from the database</h2>
           <span className="text-xs text-muted font-mono">
-            SELECT * FROM v_impact_summary · login mb_public · <b>synthetic data</b>
+            SELECT * FROM v_impact_summary
             {s ? ` · ${s.from_day} to ${s.to_day}` : ""}
           </span>
         </div>
@@ -200,7 +195,6 @@ export default function Landing() {
             <div className="card h-full p-5 sm:p-6 flex flex-col">
               <div className="flex items-baseline justify-between">
                 <div className="text-xs font-medium text-muted">Kilograms delivered per day</div>
-                <div className="text-xs text-muted font-mono">v_impact_daily</div>
               </div>
               <div className="mt-4 h-56 flex-1">
                 {!d?.daily ? <Skeleton className="h-full" /> : (
@@ -226,7 +220,7 @@ export default function Landing() {
             {s && [
               ["Meals saved", s.meals_saved, fmt.n, "meal-equivalents delivered", "leaf"],
               ["Food diverted", s.kg_diverted, fmt.kg, `${s.rescue_rate_pct}% of posted kg rescued`, "ink"],
-              ["Carbon avoided", s.co2e_avoided_kg, (v) => `${fmt.n(v)} kg`, "CO₂e, factor TO VERIFY", "ink"],
+              ["Carbon avoided", s.co2e_avoided_kg, (v) => `${fmt.n(v)} kg`, "CO₂e avoided", "ink"],
               ["Avg. response", s.avg_response_min, (v) => `${fmt.n(v)} min`, "post to first claim", "accent"],
             ].map(([l, v, f, sub, tone], i) => (
               <motion.div key={l} className="bezel" {...rise} transition={{ ...rise.transition, delay: i * 0.08 }}>
@@ -273,29 +267,6 @@ export default function Landing() {
         </ol>
       </section>
 
-      {/* ---------- footer: the wordmark again, cropped by the page edge ---------- */}
-      <footer className="relative overflow-hidden border-t border-line mt-8">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 pt-12 flex flex-wrap items-start justify-between gap-6 text-sm">
-          <div className="flex items-center gap-3">
-            <LogoMark className="w-10 h-10" />
-            <div>
-              <div className="font-semibold">MealBridge</div>
-              <div className="text-xs text-muted">BCSE302P Database Systems Lab project · all data shown is synthetic</div>
-            </div>
-          </div>
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-muted">
-            <Link href="/impact" className="hover:text-ink">Impact</Link>
-            <Link href="/lab/race" className="hover:text-ink">Race demo</Link>
-            <Link href="/lab/explain" className="hover:text-ink">EXPLAIN</Link>
-            <Link href="/lab/custody" className="hover:text-ink">Audit trail</Link>
-            <Link href="/lab/schema" className="hover:text-ink">Schema</Link>
-            <Link href="/login" className="hover:text-ink">Log in</Link>
-          </nav>
-        </div>
-        <div className="wordmark wordmark-foot display text-center leading-[.8] whitespace-nowrap select-none mt-10" aria-hidden="true">
-          Meal<span className="text-glow">Bridge</span>
-        </div>
-      </footer>
     </div>
   );
 }

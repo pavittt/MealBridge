@@ -40,7 +40,7 @@ export default function ExplainPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Database lab" title="Query plans, before and after indexing">
+      <PageHeader title="Query plans, before and after indexing">
         Five queries the app really runs. "Without the index" asks MySQL to ignore that index; "with it" is what the
         app gets. Row counts and milliseconds are MySQL's own, measured just now.
       </PageHeader>

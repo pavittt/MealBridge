@@ -18,7 +18,6 @@ function Panel({ title, view, block, children, className = "" }) {
     <section className={`card p-5 ${className}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
         <h2 className="font-bold">{title}</h2>
-        <code className="text-[11px] text-muted font-mono">{view}</code>
       </div>
       {!block && <Skeleton className="h-56" />}
       {block?.denied && (
@@ -43,8 +42,8 @@ export default function ImpactPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Impact" title="What the platform has saved">
-        Read with your login ({user.role.toLowerCase().replace("_", " ")}). Synthetic data
+      <PageHeader title="What the platform has saved">
+        Read with your login ({user.role.toLowerCase().replace("_", " ")})
         {s ? `, ${s.from_day} to ${s.to_day}` : ""}.
       </PageHeader>
       <ErrorBox error={err} />
@@ -53,9 +52,9 @@ export default function ImpactPage() {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           {!s && [0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
           {s && <>
-            <Stat label="Meals saved" value={fmt.n(s.meals_saved)} sub="fn_meals(kg, category)" tone="leaf" />
+            <Stat label="Meals saved" value={fmt.n(s.meals_saved)} sub="meal-equivalents delivered" tone="leaf" />
             <Stat label="Food diverted" value={fmt.kg(s.kg_diverted)} sub={`${s.batches_delivered} of ${s.batches_posted} batches`} />
-            <Stat label="Carbon avoided" value={`${fmt.n(s.co2e_avoided_kg)} kg`} sub="CO₂e · factor TO VERIFY" />
+            <Stat label="Carbon avoided" value={`${fmt.n(s.co2e_avoided_kg)} kg`} sub="CO₂e avoided" />
             <Stat label="Rescue rate" value={`${s.rescue_rate_pct}%`} sub={`${fmt.kg(s.kg_expired)} still expired`} tone="accent" />
             <Stat label="Response time" value={`${s.avg_response_min} min`} sub={`post → delivery ${s.avg_post_to_delivery_min} min`} />
           </>}
@@ -113,7 +112,7 @@ export default function ImpactPage() {
               </div>
               {d?.jain?.rows?.[0] && (
                 <p className="text-sm mt-2">Jain's fairness index <b className="font-mono">{d.jain.rows[0].jain_index}</b>
-                  <span className="text-muted"> (1.000 = perfectly even per beneficiary, {d.jain.rows[0].worst_possible} = one shelter gets all) · v_fairness_index</span></p>
+                  <span className="text-muted"> (1.000 = perfectly even per beneficiary, {d.jain.rows[0].worst_possible} = one shelter gets all)</span></p>
               )}
             </>
           )}

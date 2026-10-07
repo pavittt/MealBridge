@@ -187,7 +187,7 @@ export default function MessPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <PageHeader eyebrow="Mess admin" title={d?.mess?.name || "Your mess"}>
+      <PageHeader title={d?.mess?.name || "Your mess"}>
         {d?.mess ? `${d.mess.campus}, block ${d.mess.hostel_block} · ${fmt.title(d.mess.mess_type)} · ${fmt.n(d.mess.daily_capacity_meals)} meals a day` : " "}
       </PageHeader>
       <ErrorBox error={err} />
@@ -229,15 +229,22 @@ export default function MessPage() {
 
           {hist && hist.length > 0 && (
             <div className="card p-5 mt-6">
-              <h2 className="font-bold mb-3">Last 14 days at this mess <span className="text-xs text-muted font-normal">· from view v_batch_outcome</span></h2>
+              <h2 className="font-bold mb-3">Last 14 days at this mess</h2>
               <div className="flex items-end gap-1.5" role="img" aria-label="Daily kg delivered versus expired">
                 {(() => {
                   // one bar per day: expired stacked on top of delivered, scaled to the busiest day
                   const max = Math.max(...hist.map((x) => Number(x.kg_posted))) || 1;
                   const H = 120;   // px, so the heights do not depend on a percentage parent
+                  const kg = (v) => Math.round(Number(v));
+                  // the kilograms are printed above each bar, always (not only on hover):
+                  // delivered in green, expired in red when there was any
                   return hist.map((h) => (
-                    <div key={h.day} className="flex-1 flex flex-col justify-end gap-px" style={{ height: H }}
+                    <div key={h.day} className="flex-1 min-w-0 flex flex-col justify-end items-stretch gap-px" style={{ height: H + 30 }}
                          title={`${h.day}: ${h.kg_delivered} kg delivered, ${h.kg_expired} kg expired of ${h.kg_posted} kg`}>
+                      <div className="text-center leading-tight tabular-nums mb-0.5" aria-hidden="true">
+                        {Number(h.kg_expired) > 0 && <div className="text-[9px] text-danger">{kg(h.kg_expired)}</div>}
+                        <div className="text-[10px] font-semibold text-leaf">{Number(h.kg_delivered) > 0 ? kg(h.kg_delivered) : ""}</div>
+                      </div>
                       <div className="bg-danger/70 rounded-t" style={{ height: (Number(h.kg_expired) / max) * H }} />
                       <div className="bg-leaf rounded-b" style={{ height: (Number(h.kg_delivered) / max) * H }} />
                     </div>
@@ -247,7 +254,7 @@ export default function MessPage() {
               <div className="flex gap-1.5 mt-1">
                 {hist.map((h) => <div key={h.day} className="flex-1 text-[9px] text-muted text-center">{h.day.slice(8)}</div>)}
               </div>
-              <div className="flex gap-4 mt-2 text-xs text-muted"><span><span className="inline-block w-2 h-2 bg-leaf rounded-sm" /> delivered</span><span><span className="inline-block w-2 h-2 bg-danger/70 rounded-sm" /> expired</span></div>
+              <div className="flex gap-4 mt-2 text-xs text-muted"><span><span className="inline-block w-2 h-2 bg-leaf rounded-sm" /> kg delivered</span><span><span className="inline-block w-2 h-2 bg-danger/70 rounded-sm" /> kg expired</span></div>
             </div>
           )}
         </section>

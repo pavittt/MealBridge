@@ -20,7 +20,7 @@ const HOME = { MESS_ADMIN: "/mess", SHELTER: "/shelter", VOLUNTEER: "/volunteer"
 const ROLE_LABEL = { MESS_ADMIN: "Mess admin", SHELTER: "Shelter", VOLUNTEER: "Volunteer", PLATFORM_ADMIN: "Platform admin" };
 export const homeFor = (role) => HOME[role] || "/";
 
-/* The mark: a saffron tile holding a bridge. The arch is the route from a
+/* The mark: an accent-coloured (crimson) tile holding a bridge. The arch is the route from a
    mess to a shelter; the deck is the table it lands on; the green grain at
    the top of the arch is the meal in transit. */
 export function LogoMark({ className = "w-9 h-9" }) {
